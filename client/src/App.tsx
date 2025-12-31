@@ -5,7 +5,7 @@ import Home from "@/pages/Home";
 import IntentionCapture from "@/pages/IntentionCapture";
 import ConsentVibe from "@/pages/ConsentVibe";
 import Recording from "@/pages/Recording";
-import Success from "@/pages/Success";
+import Results from "@/pages/Results";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -15,7 +15,7 @@ function Router() {
       <Route path="/capture" component={IntentionCapture} />
       <Route path="/consent" component={ConsentVibe} />
       <Route path="/recording" component={Recording} />
-      <Route path="/success" component={Success} />
+      <Route path="/success" component={Results} />
       <Route component={NotFound} />
     </Switch>
   );
