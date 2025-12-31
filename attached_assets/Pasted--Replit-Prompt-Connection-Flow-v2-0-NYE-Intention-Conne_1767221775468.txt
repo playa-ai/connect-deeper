@@ -1,0 +1,471 @@
+# Replit Prompt: Connection Flow v2.0 - NYE Intention & Connection App
+
+---
+
+## Project Overview
+
+Build a mobile-first web application called **"Connection"** that facilitates meaningful in-person conversations at events. The app captures participants' 2026 intentions, records short conversation sessions with guided questions, and collects feedback. The core philosophy is "Lead with value, consent follows naturally."
+
+**Primary Use Case**: A host approaches someone at a NYE party, has a verbal conversation about intentions, then uses the app to capture and deepen the connection through recorded questions.
+
+---
+
+## Tech Stack
+
+- **Framework**: React with TypeScript
+- **Styling**: Tailwind CSS
+- **State Management**: React Context or Zustand
+- **Audio Recording**: MediaRecorder API (browser native)
+- **Storage**: Supabase (database + audio file storage)
+- **Authentication**: None for MVP (host-based sessions)
+- **Deployment**: Replit hosting
+
+---
+
+## Core User Flow
+
+```
+[Verbal Hook - No App] 
+    → Screen 1: Intention Capture 
+    → Screen 2: Consent + Vibe 
+    → Screen 3: Recording (3 Questions) 
+    → Screen 4: Success + NPS
+```
+
+---
+
+## Screen Specifications
+
+### Screen 1: Intention Capture
+**Route**: `/capture`
+
+**Purpose**: Capture the guest's 2026 intention and email after the verbal hook conversation.
+
+**UI Elements**:
+- Header: "🎯 Your 2026 Intention" (centered, large)
+- Text input field (multiline, placeholder: "Type your intention here...")
+- Label: "Where should we send your reminder?"
+- Email input field (placeholder: "your@email.com")
+- Primary button: "Save & Continue →"
+
+**Validation**:
+- Intention: Required, min 5 characters
+- Email: Required, valid email format
+
+**Data Captured**:
+```typescript
+{
+  intention_text: string,
+  guest_email: string,
+  intention_captured_at: timestamp,
+  geolocation: { lat: number, lng: number } // if permission granted
+}
+```
+
+**On Submit**: Navigate to `/consent`
+
+---
+
+### Screen 2: Consent + Vibe Selection
+**Route**: `/consent`
+
+**Purpose**: Get consent for recording and let user choose conversation depth.
+
+**UI Elements**:
+- Header: "Ready to go deeper?" (centered)
+- Subtext: "We'll record a 3-minute conversation. Your words stay private unless you choose to share them."
+- Label: "How deep do you want to go?"
+- Horizontal slider with labels:
+  - Left end: "Light" 
+  - Right end: "Deep"
+  - Visual indicator showing current position
+- Primary button: "Let's Connect 🎙️"
+- Secondary link: "Not this time" (returns to home or closes)
+
+**Data Captured**:
+```typescript
+{
+  vibe_depth: number, // 0-100
+  guest_consented: boolean,
+  consent_timestamp: timestamp
+}
+```
+
+**On "Let's Connect"**: Set `guest_consented: true`, navigate to `/recording`
+
+**On "Not this time"**: Navigate to `/` or show graceful exit message
+
+---
+
+### Screen 3: Recording Session
+**Route**: `/recording`
+
+**Purpose**: Guide both participants through 3 questions while recording audio.
+
+**UI Elements**:
+- Recording indicator: "🔴 Recording" (top left, pulsing animation)
+- Large centered question text (current question)
+- Progress indicator: "Question 1 of 3"
+- Helper text: "Both share, then tap Next"
+- Primary button: "Next →" (changes to "Finish" on Q3)
+
+**Question Logic**:
+
+Select questions based on `vibe_depth` value:
+
+**LIGHT (0-33)**:
+1. "What do you need more of in 2026?"
+2. "What's something about you that would surprise me?"
+3. "What gift could you give me right now that costs nothing?"
+
+**MIDDLE (34-66)**:
+1. "What would make 2026 your best year yet?"
+2. "What's a risk you want to take this year?"
+3. "What do you hope we both remember from this conversation?"
+
+**DEEP (67-100)**:
+1. "What needs to change in your life for that intention to happen?"
+2. "What are you ready to let go of?"
+3. "What do you need to hear right now that you haven't heard enough?"
+
+**Recording Behavior**:
+- Start recording when screen mounts
+- Continue recording across all 3 questions (single continuous audio file)
+- Stop recording when user taps "Finish" on Q3
+- Store audio blob temporarily, upload after session ends
+
+**Data Captured**:
+```typescript
+{
+  questions_asked: string[], // array of 3 question texts
+  audio_blob: Blob,
+  audio_duration_seconds: number
+}
+```
+
+**On Finish**: Stop recording, navigate to `/success`
+
+---
+
+### Screen 4: Success + NPS
+**Route**: `/success`
+
+**Purpose**: Confirm save, collect feedback, and offer sharing.
+
+**UI Elements**:
+- Success icon: "✨" (large, centered, with subtle animation)
+- Header: "Saved"
+- Subtext: "We'll send you a reminder of your intention on January 1st."
+- Label: "How was this experience?"
+- NPS row: Emoji scale with numbers 0-10
+  - Left emoji: 😐
+  - Right emoji: 🤩
+  - Tappable number buttons (0-10)
+- Text input: "What would make it better?" (optional)
+- Primary button: "Done"
+- Divider line
+- Section: "Know someone who'd love this?"
+- Secondary button: "Share with a friend"
+
+**Data Captured**:
+```typescript
+{
+  nps_score: number, // 0-10
+  feedback_text?: string
+}
+```
+
+**On Done**: 
+- Upload audio file to storage
+- Save complete connection record to database
+- Navigate to `/` or show "Ready for next connection" state
+
+**On Share**: 
+- Open native share sheet with link/text, OR
+- Copy shareable link to clipboard with toast confirmation
+
+---
+
+## Data Model
+
+```typescript
+interface Connection {
+  // Identifiers
+  id: string; // UUID
+  host_id: string; // Could be device ID or session ID for MVP
+  
+  // Intention (captured first)
+  intention_text: string;
+  intention_captured_at: string; // ISO timestamp
+  
+  // Contact
+  guest_email: string;
+  host_email?: string;
+  
+  // Context
+  created_at: string; // ISO timestamp
+  location?: {
+    lat: number;
+    lng: number;
+  };
+  
+  // Vibe
+  vibe_depth: number; // 0-100
+  
+  // Consent
+  guest_consented: boolean;
+  consent_timestamp: string; // ISO timestamp
+  
+  // Recording
+  audio_url?: string; // Supabase storage URL after upload
+  audio_duration_seconds?: number;
+  questions_asked: string[]; // Array of 3 question texts
+  
+  // Feedback
+  nps_score?: number; // 0-10
+  feedback_text?: string;
+  
+  // Follow-up tracking
+  reminder_sent: boolean;
+  reminder_sent_at?: string;
+}
+```
+
+---
+
+## Database Schema (Supabase)
+
+```sql
+CREATE TABLE connections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  host_id TEXT NOT NULL,
+  
+  intention_text TEXT NOT NULL,
+  intention_captured_at TIMESTAMPTZ NOT NULL,
+  
+  guest_email TEXT NOT NULL,
+  host_email TEXT,
+  
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  location_lat DOUBLE PRECISION,
+  location_lng DOUBLE PRECISION,
+  
+  vibe_depth INTEGER CHECK (vibe_depth >= 0 AND vibe_depth <= 100),
+  
+  guest_consented BOOLEAN DEFAULT FALSE,
+  consent_timestamp TIMESTAMPTZ,
+  
+  audio_url TEXT,
+  audio_duration_seconds INTEGER,
+  questions_asked TEXT[], -- PostgreSQL array
+  
+  nps_score INTEGER CHECK (nps_score >= 0 AND nps_score <= 10),
+  feedback_text TEXT,
+  
+  reminder_sent BOOLEAN DEFAULT FALSE,
+  reminder_sent_at TIMESTAMPTZ
+);
+```
+
+---
+
+## Audio Recording Implementation
+
+```typescript
+// Use MediaRecorder API
+const useAudioRecorder = () => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream, {
+      mimeType: 'audio/webm;codecs=opus'
+    });
+    
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunksRef.current.push(e.data);
+    };
+    
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      setAudioBlob(blob);
+      chunksRef.current = [];
+    };
+    
+    mediaRecorderRef.current = mediaRecorder;
+    mediaRecorder.start();
+    setIsRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  return { isRecording, audioBlob, startRecording, stopRecording };
+};
+```
+
+---
+
+## UI/UX Guidelines
+
+### Visual Style
+- **Background**: Dark theme (deep purple/black gradient) for evening/party context
+- **Primary Color**: Warm gold or coral accent
+- **Typography**: Clean sans-serif, large readable text for low-light conditions
+- **Spacing**: Generous padding for touch targets
+- **Animations**: Subtle, smooth transitions (no jarring movements)
+
+### Mobile-First Considerations
+- Design for single-hand use
+- Large tap targets (minimum 44x44px)
+- Bottom-anchored primary actions
+- Minimal scrolling required per screen
+- Support both portrait orientation primarily
+
+### Recording Screen Special Considerations
+- Keep screen awake during recording
+- Pulsing red dot animation for recording indicator
+- Large, readable question text (consider 24px+ font)
+- Clear visual feedback on button taps
+
+---
+
+## Component Structure
+
+```
+src/
+├── components/
+│   ├── ui/
+│   │   ├── Button.tsx
+│   │   ├── Input.tsx
+│   │   ├── Slider.tsx
+│   │   ├── NPSSelector.tsx
+│   │   └── RecordingIndicator.tsx
+│   ├── screens/
+│   │   ├── IntentionCapture.tsx
+│   │   ├── ConsentVibe.tsx
+│   │   ├── Recording.tsx
+│   │   └── Success.tsx
+│   └── layout/
+│       └── AppShell.tsx
+├── hooks/
+│   ├── useAudioRecorder.ts
+│   ├── useGeolocation.ts
+│   └── useConnection.ts
+├── lib/
+│   ├── supabase.ts
+│   ├── questions.ts
+│   └── storage.ts
+├── context/
+│   └── ConnectionContext.tsx
+├── types/
+│   └── index.ts
+└── App.tsx
+```
+
+---
+
+## Question Selection Logic
+
+```typescript
+// lib/questions.ts
+
+type VibeLevel = 'light' | 'middle' | 'deep';
+
+const QUESTIONS: Record<VibeLevel, string[]> = {
+  light: [
+    "What do you need more of in 2026?",
+    "What's something about you that would surprise me?",
+    "What gift could you give me right now that costs nothing?"
+  ],
+  middle: [
+    "What would make 2026 your best year yet?",
+    "What's a risk you want to take this year?",
+    "What do you hope we both remember from this conversation?"
+  ],
+  deep: [
+    "What needs to change in your life for that intention to happen?",
+    "What are you ready to let go of?",
+    "What do you need to hear right now that you haven't heard enough?"
+  ]
+};
+
+export const getVibeLevel = (depth: number): VibeLevel => {
+  if (depth <= 33) return 'light';
+  if (depth <= 66) return 'middle';
+  return 'deep';
+};
+
+export const getQuestions = (vibeDepth: number): string[] => {
+  return QUESTIONS[getVibeLevel(vibeDepth)];
+};
+```
+
+---
+
+## MVP Priorities
+
+### Must Have (Tonight)
+1. ✅ Intention capture screen (text + email input)
+2. ✅ Consent + vibe slider screen
+3. ✅ 3-question recording flow with audio capture
+4. ✅ NPS feedback screen
+5. ✅ Data persistence to Supabase
+6. ✅ Audio file upload to Supabase Storage
+
+### Nice to Have (Post-MVP)
+- [ ] Jan 1 automated email reminder (use Supabase Edge Functions)
+- [ ] Smooth slider interpolation between vibe levels
+- [ ] Share functionality with deep links
+- [ ] Host dashboard to view past connections
+- [ ] Audio playback on success screen
+- [ ] Progressive Web App (PWA) capabilities
+
+### Skip for Now
+- User authentication
+- Multiple host support
+- Connection matching features
+- Transcript generation
+
+---
+
+## Environment Variables
+
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+---
+
+## Testing Checklist
+
+- [ ] Intention input accepts multiline text
+- [ ] Email validation works correctly
+- [ ] Vibe slider is smooth and responsive
+- [ ] Audio recording starts/stops properly
+- [ ] Questions change based on vibe level
+- [ ] NPS selector highlights selected number
+- [ ] Data saves to Supabase correctly
+- [ ] Audio uploads to storage successfully
+- [ ] Works on mobile Safari and Chrome
+- [ ] Handles microphone permission denial gracefully
+- [ ] Works offline (graceful degradation)
+
+---
+
+## Error Handling
+
+- **Microphone Permission Denied**: Show friendly message explaining why audio is needed, offer to continue without recording
+- **Network Failure**: Queue data locally, retry upload when connection restored
+- **Geolocation Denied**: Continue without location data (optional field)
+- **Invalid Email**: Inline validation with clear error message
+
+---
+
+Build this as a polished, production-ready mobile web app optimized for low-light party environments with a focus on quick, frictionless interactions.
