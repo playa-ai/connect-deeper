@@ -58,19 +58,19 @@ export async function analyzeAudio(
         role: "user",
         parts: [
           {
-            text: `Based on this conversation about someone's 2026 intention, provide meaningful insights:
+            text: `Write a brief, uplifting summary of this person's 2026 intention.
 
 Intention: "${intentionText}"
 
-Conversation transcript:
+Conversation context:
 ${transcript}
 
-Provide:
-1. Key themes that emerged from the conversation
-2. The core values or motivations expressed
-3. An inspiring summary of their vision for 2026
-
-Keep it concise, warm, and personal. Format with short paragraphs, no bullet points.`,
+RULES:
+- Write ONLY 2-3 short sentences (max 50 words total)
+- Use plain text only - NO markdown, NO asterisks, NO bold formatting
+- Be warm and encouraging
+- Focus on their core motivation and vision
+- Start directly with the insight, no intro phrases`,
           },
         ],
       },

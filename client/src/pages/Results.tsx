@@ -262,19 +262,6 @@ export default function Results() {
           </div>
         )}
 
-        {transcript && (
-          <details className="bg-white/5 rounded-2xl border border-white/10 overflow-hidden">
-            <summary className="p-4 cursor-pointer text-white/60 hover:text-white/80 transition-colors">
-              View Transcript
-            </summary>
-            <div className="px-4 pb-4">
-              <p className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap" data-testid="text-transcript">
-                {transcript}
-              </p>
-            </div>
-          </details>
-        )}
-
         <div className="grid grid-cols-2 gap-4">
           <Button variant="outline" onClick={handleShare} className="h-12 border-white/10 hover:bg-white/5" data-testid="button-share">
             <Share2 className="mr-2 w-4 h-4" /> Share
