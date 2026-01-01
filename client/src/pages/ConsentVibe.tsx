@@ -32,7 +32,6 @@ export default function ConsentVibe() {
       await updateConnection(data.connectionId, {
         vibeDepth: vibe,
         guestConsented: true,
-        consentTimestamp: new Date(),
       });
 
       updateData({

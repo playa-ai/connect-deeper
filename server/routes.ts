@@ -29,7 +29,14 @@ export async function registerRoutes(
   app.patch("/api/connections/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const connection = await storage.updateConnection(id, req.body);
+      const updates = { ...req.body };
+      
+      // Auto-set consent timestamp when guest consents
+      if (updates.guestConsented === true && !updates.consentTimestamp) {
+        updates.consentTimestamp = new Date();
+      }
+      
+      const connection = await storage.updateConnection(id, updates);
       if (!connection) {
         return res.status(404).json({ error: "Connection not found" });
       }
