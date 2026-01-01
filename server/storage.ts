@@ -4,8 +4,15 @@ const { Pool } = pkg;
 import { connections, type Connection, type InsertConnection } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
+});
+
+pool.on("error", (err) => {
+  console.error("Unexpected database pool error:", err);
 });
 
 const db = drizzle(pool);
