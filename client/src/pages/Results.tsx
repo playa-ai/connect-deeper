@@ -37,37 +37,38 @@ export default function Results() {
     defaultValues: { email: "" },
   });
 
-  useEffect(() => {
-    async function analyze() {
-      if (!data.connectionId) {
-        setErrorMessage("No connection found");
-        setProcessingState('error');
-        return;
-      }
-
-      try {
-        setProcessingState('analyzing');
-        const analysis = await analyzeConnection(data.connectionId);
-        setTranscript(analysis.transcript);
-        setInsights(analysis.insights);
-        
-        setProcessingState('generating');
-        try {
-          const poster = await generatePoster(data.connectionId);
-          setPosterImageUrl(poster.posterImageUrl);
-        } catch (posterError) {
-          console.error("Poster generation failed:", posterError);
-        }
-        
-        setProcessingState('complete');
-      } catch (error) {
-        console.error("Analysis failed:", error);
-        setErrorMessage(error instanceof Error ? error.message : "Failed to analyze");
-        setProcessingState('complete');
-      }
+  const runAnalysis = async () => {
+    if (!data.connectionId) {
+      setErrorMessage("No connection found. Please start over.");
+      setProcessingState('error');
+      return;
     }
 
-    analyze();
+    try {
+      setProcessingState('analyzing');
+      setErrorMessage("");
+      const analysis = await analyzeConnection(data.connectionId);
+      setTranscript(analysis.transcript);
+      setInsights(analysis.insights);
+      
+      setProcessingState('generating');
+      try {
+        const poster = await generatePoster(data.connectionId);
+        setPosterImageUrl(poster.posterImageUrl);
+      } catch (posterError) {
+        console.error("Poster generation failed:", posterError);
+      }
+      
+      setProcessingState('complete');
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      setErrorMessage(error instanceof Error ? error.message : "Failed to analyze conversation");
+      setProcessingState('error');
+    }
+  };
+
+  useEffect(() => {
+    runAnalysis();
   }, [data.connectionId]);
 
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
@@ -185,11 +186,16 @@ export default function Results() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-8 bg-background">
         <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-white">Something went wrong</h2>
-          <p className="text-muted-foreground">{errorMessage}</p>
-          <Button onClick={() => setLocation("/")} className="mt-4">
-            Go Home
-          </Button>
+          <h2 className="text-2xl font-bold text-white" data-testid="text-error-title">Something went wrong</h2>
+          <p className="text-muted-foreground" data-testid="text-error-message">{errorMessage}</p>
+          <div className="flex gap-4 justify-center">
+            <Button onClick={runAnalysis} className="mt-4" data-testid="button-retry">
+              Try Again
+            </Button>
+            <Button variant="outline" onClick={() => setLocation("/")} className="mt-4" data-testid="button-go-home">
+              Go Home
+            </Button>
+          </div>
         </div>
       </div>
     );
