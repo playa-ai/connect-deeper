@@ -66,7 +66,6 @@ export default function IntentionCapture() {
         intentionText: values.intention,
         vibeDepth: 50,
         guestConsented: false,
-        guestEmail: "",
       });
       
       updateData({

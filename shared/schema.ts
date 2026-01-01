@@ -12,7 +12,7 @@ export const connections = pgTable("connections", {
   intentionCapturedAt: timestamp("intention_captured_at").notNull().defaultNow(),
   
   // Contact
-  guestEmail: text("guest_email").notNull(),
+  guestEmail: text("guest_email"),
   hostEmail: text("host_email"),
   
   // Context
