@@ -12,6 +12,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import { updateConnection } from "@/lib/api";
 
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -23,24 +24,20 @@ export default function Results() {
   const [processingState, setProcessingState] = useState<'analyzing' | 'generating' | 'complete'>('analyzing');
   const [posterData, setPosterData] = useState<PosterData | null>(null);
   
-  // Feedback State
   const [nps, setNps] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Email form
   const form = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: "" },
   });
 
-  // Simulate AI Processing
   useEffect(() => {
-    // Step 1: Analyzing Audio
     const timer1 = setTimeout(() => {
       setProcessingState('generating');
     }, 2000);
 
-    // Step 2: Generating Poster
     const timer2 = setTimeout(() => {
       setPosterData(generatePosterData(data.vibeDepth, data.intentionText));
       setProcessingState('complete');
@@ -52,30 +49,64 @@ export default function Results() {
     };
   }, [data.vibeDepth, data.intentionText]);
 
-  const handleEmailSubmit = (values: z.infer<typeof emailSchema>) => {
-    updateData({ guestEmail: values.email });
-    toast({
-      title: "Poster Sent!",
-      description: `We've emailed your connection poster to ${values.email}`,
-    });
+  const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
+    if (!data.connectionId) return;
+    
+    try {
+      await updateConnection(data.connectionId, {
+        guestEmail: values.email,
+      });
+      
+      updateData({ guestEmail: values.email });
+      
+      toast({
+        title: "Poster Sent!",
+        description: `We've emailed your connection poster to ${values.email}`,
+      });
+    } catch (error) {
+      console.error("Error updating email:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save email. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDone = () => {
-    updateData({
+  const handleDone = async () => {
+    if (!data.connectionId) return;
+    
+    setIsSaving(true);
+    try {
+      await updateConnection(data.connectionId, {
         npsScore: nps,
         feedbackText: feedback,
-    });
-    
-    // Simulate save
-    toast({
+      });
+
+      updateData({
+        npsScore: nps,
+        feedbackText: feedback,
+      });
+      
+      toast({
         title: "Session Saved",
         description: "Thank you for connecting.",
-    });
+      });
 
-    setTimeout(() => {
-      reset();
-      setLocation("/");
-    }, 1500);
+      setTimeout(() => {
+        reset();
+        setLocation("/");
+      }, 1500);
+    } catch (error) {
+      console.error("Error saving feedback:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save feedback.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleShare = () => {
@@ -93,7 +124,6 @@ export default function Results() {
   if (processingState !== 'complete' || !posterData) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-8 bg-background relative overflow-hidden">
-        {/* Loading Animation */}
         <div className="relative">
           <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse" />
           <Loader2 className="w-16 h-16 text-primary animate-spin relative z-10" />
@@ -126,13 +156,10 @@ export default function Results() {
           <p className="text-muted-foreground">Generated from your voice & intention</p>
         </div>
 
-        {/* The Poster Card */}
         <div className={`relative w-full aspect-[4/5] rounded-3xl overflow-hidden p-8 flex flex-col justify-between shadow-2xl bg-gradient-to-br ${posterData.colorScheme}`}>
-          {/* Abstract Texture Overlay */}
           <div className="absolute inset-0 bg-noise opacity-20 pointer-events-none" />
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[80px] rounded-full pointer-events-none" />
           
-          {/* Content */}
           <div className="relative z-10 space-y-6">
             <div className="flex justify-between items-start">
               <Sparkles className="text-white/80 w-8 h-8" />
@@ -166,7 +193,6 @@ export default function Results() {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-4">
             <Button variant="outline" onClick={handleShare} className="h-12 border-white/10 hover:bg-white/5">
             <Share2 className="mr-2 w-4 h-4" /> Share
@@ -176,7 +202,6 @@ export default function Results() {
             </Button>
         </div>
 
-        {/* Email Capture */}
         <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
             <div className="text-center space-y-1">
             <h3 className="font-medium text-white">Save this memory</h3>
@@ -204,7 +229,6 @@ export default function Results() {
             </Form>
         </div>
 
-        {/* Feedback Section */}
         <div className="space-y-6 border-t border-white/10 pt-8">
              <div className="space-y-3">
                 <label className="text-sm font-medium text-white/80 block text-center">
@@ -216,7 +240,7 @@ export default function Results() {
                         {[1,2,3,4,5].map((num) => (
                             <button
                                 key={num}
-                                onClick={() => setNps(num * 2)} // Mapping 1-5 to 2-10 scale roughly or just use 1-5
+                                onClick={() => setNps(num * 2)}
                                 className={`w-10 h-10 rounded-full font-bold text-sm transition-all flex items-center justify-center flex-shrink-0 ${
                                     (nps || 0) / 2 === num 
                                     ? "bg-accent text-black scale-110 shadow-lg shadow-accent/30" 
@@ -240,9 +264,16 @@ export default function Results() {
 
             <Button 
                 onClick={handleDone}
+                disabled={isSaving}
                 className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-white/90 rounded-full"
             >
-                Start New Connection
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 w-5 h-5 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  "Start New Connection"
+                )}
             </Button>
         </div>
 

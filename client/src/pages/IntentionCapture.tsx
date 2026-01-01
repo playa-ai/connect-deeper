@@ -7,8 +7,10 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Mic, MicOff, Loader2 } from "lucide-react";
+import { ArrowRight, Mic, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { createConnection } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   intention: z.string().min(5, "Intention must be at least 5 characters."),
@@ -18,6 +20,7 @@ export default function IntentionCapture() {
   const [, setLocation] = useLocation();
   const { updateData } = useConnection();
   const [isListening, setIsListening] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,19 +37,40 @@ export default function IntentionCapture() {
         setIsListening(false);
         const current = form.getValues("intention");
         const mockText = "I want to be more present and connect deeply with the people around me this year.";
-        // Append or replace
         form.setValue("intention", current ? current + " " + mockText : mockText, { shouldValidate: true });
       }, 3000);
     }
     return () => clearTimeout(timeout);
   }, [isListening, form]);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateData({
-      intentionText: values.intention,
-      // Email is now captured at the end
-    });
-    setLocation("/consent");
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSaving(true);
+    try {
+      // Create initial connection record in database
+      const connection = await createConnection({
+        hostId: "host-" + Date.now(), // Mock host ID for MVP
+        intentionText: values.intention,
+        vibeDepth: 50, // Default, will be updated later
+        guestConsented: false,
+        guestEmail: "", // Will be filled later
+      });
+      
+      updateData({
+        connectionId: connection.id,
+        intentionText: values.intention,
+      });
+      
+      setLocation("/consent");
+    } catch (error) {
+      console.error("Error saving intention:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your intention. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   }
 
   return (
@@ -127,9 +151,17 @@ export default function IntentionCapture() {
             <Button 
               type="submit" 
               className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity rounded-full shadow-lg shadow-primary/25 mt-4"
-              disabled={isListening}
+              disabled={isListening || isSaving}
             >
-              Continue <ArrowRight className="ml-2 w-5 h-5" />
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  Continue <ArrowRight className="ml-2 w-5 h-5" />
+                </>
+              )}
             </Button>
           </form>
         </Form>

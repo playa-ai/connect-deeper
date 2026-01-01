@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { getQuestions } from "@/lib/questions";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
+import { updateConnection } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 export default function Recording() {
   const [, setLocation] = useLocation();
   const { data, updateData } = useConnection();
   const { isRecording, startRecording, stopRecording, audioBlob, duration } = useAudioRecorder();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [isSaving, setIsSaving] = useState(false);
 
   const questions = getQuestions(data.vibeDepth);
 
@@ -19,32 +22,61 @@ export default function Recording() {
     startRecording();
     return () => stopRecording();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run once on mount
+  }, []);
 
   useEffect(() => {
-    if (audioBlob) {
-      updateData({ 
-        audioBlob,
-        audioDuration: duration,
-        questionsAsked: questions 
-      });
-      setLocation("/success");
+    if (audioBlob && !isSaving) {
+      saveRecording();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioBlob]);
+
+  const saveRecording = async () => {
+    if (!data.connectionId || !audioBlob) return;
+    
+    setIsSaving(true);
+    try {
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result as string;
+        
+        await updateConnection(data.connectionId!, {
+          audioData: base64Audio,
+          audioDurationSeconds: duration,
+          questionsAsked: questions,
+        });
+
+        updateData({ 
+          audioBlob,
+          audioDuration: duration,
+          questionsAsked: questions 
+        });
+        
+        setLocation("/success");
+      };
+    } catch (error) {
+      console.error("Error saving recording:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save recording. Please try again.",
+        variant: "destructive",
+      });
+      setIsSaving(false);
+    }
+  };
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
       stopRecording(); 
-      // Navigation happens in useEffect when blob is ready
     }
   };
 
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
 
-  // Format duration mm:ss
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -53,14 +85,12 @@ export default function Recording() {
 
   return (
     <div className="min-h-screen flex flex-col p-6 max-w-md mx-auto relative overflow-hidden bg-black">
-       {/* Ambient pulsing background */}
        <motion.div 
         animate={{ opacity: [0.3, 0.6, 0.3] }}
         transition={{ duration: 4, repeat: Infinity }}
         className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-destructive/10 via-background to-background -z-10 pointer-events-none"
       />
 
-      {/* Header */}
       <div className="flex justify-between items-center py-6">
         <div className="flex items-center gap-2">
            <motion.div 
@@ -75,7 +105,6 @@ export default function Recording() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col justify-center items-center text-center space-y-12">
         <AnimatePresence mode="wait">
           <motion.div
@@ -96,17 +125,19 @@ export default function Recording() {
         </AnimatePresence>
       </div>
 
-      {/* Footer Action */}
       <div className="py-8">
         <Button 
           onClick={handleNext}
+          disabled={isSaving}
           className={`w-full h-20 text-xl font-bold rounded-full transition-all duration-300 shadow-2xl ${
             isLastQuestion 
             ? "bg-white text-black hover:bg-white/90 shadow-white/10" 
             : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10"
           }`}
         >
-          {isLastQuestion ? (
+          {isSaving ? (
+            <span>Saving...</span>
+          ) : isLastQuestion ? (
             <span className="flex items-center gap-3">Finish <Check className="w-6 h-6" /></span>
           ) : (
             <span className="flex items-center gap-3">Next Question <ArrowRight className="w-6 h-6" /></span>

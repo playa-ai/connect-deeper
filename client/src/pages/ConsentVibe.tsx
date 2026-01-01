@@ -4,22 +4,53 @@ import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { motion } from "framer-motion";
-import { Mic, X } from "lucide-react";
+import { Mic, Loader2 } from "lucide-react";
 import { getVibeLevel } from "@/lib/questions";
+import { updateConnection } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 export default function ConsentVibe() {
   const [, setLocation] = useLocation();
   const { updateData, data } = useConnection();
   const [vibe, setVibe] = useState(50);
+  const [isSaving, setIsSaving] = useState(false);
 
   const vibeLevel = getVibeLevel(vibe);
   
-  const handleConnect = () => {
-    updateData({
-      vibeDepth: vibe,
-      guestConsented: true,
-    });
-    setLocation("/recording");
+  const handleConnect = async () => {
+    if (!data.connectionId) {
+      toast({
+        title: "Error",
+        description: "No connection found. Please start over.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateConnection(data.connectionId, {
+        vibeDepth: vibe,
+        guestConsented: true,
+        consentTimestamp: new Date(),
+      });
+
+      updateData({
+        vibeDepth: vibe,
+        guestConsented: true,
+      });
+      
+      setLocation("/recording");
+    } catch (error) {
+      console.error("Error updating consent:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save your choice. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleDecline = () => {
@@ -70,14 +101,24 @@ export default function ConsentVibe() {
         <div className="space-y-4 pt-4">
           <Button 
             onClick={handleConnect}
+            disabled={isSaving}
             className="w-full h-16 text-xl font-semibold bg-white text-black hover:bg-white/90 rounded-full shadow-xl shadow-white/5"
           >
-            Let's Connect <Mic className="ml-3 w-6 h-6" />
+            {isSaving ? (
+              <>
+                <Loader2 className="mr-3 w-6 h-6 animate-spin" /> Saving...
+              </>
+            ) : (
+              <>
+                Let's Connect <Mic className="ml-3 w-6 h-6" />
+              </>
+            )}
           </Button>
           
           <Button 
             variant="ghost" 
             onClick={handleDecline}
+            disabled={isSaving}
             className="w-full text-muted-foreground hover:text-white"
           >
             Not this time

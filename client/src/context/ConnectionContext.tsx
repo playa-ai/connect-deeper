@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface ConnectionData {
+  connectionId: string | null; // Database ID
   intentionText: string;
   guestEmail: string;
   vibeDepth: number;
@@ -19,6 +20,7 @@ interface ConnectionContextType {
 }
 
 const defaultData: ConnectionData = {
+  connectionId: null,
   intentionText: '',
   guestEmail: '',
   vibeDepth: 50,

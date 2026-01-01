@@ -1,38 +1,45 @@
-import { type User, type InsertUser } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { drizzle } from "drizzle-orm/node-postgres";
+import pkg from "pg";
+const { Pool } = pkg;
+import { connections, type Connection, type InsertConnection } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
-// modify the interface with any CRUD methods
-// you might need
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
+const db = drizzle(pool);
 
 export interface IStorage {
-  getUser(id: string): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  createConnection(connection: InsertConnection): Promise<Connection>;
+  getConnection(id: string): Promise<Connection | undefined>;
+  getAllConnections(): Promise<Connection[]>;
+  updateConnection(id: string, updates: Partial<InsertConnection>): Promise<Connection | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-
-  constructor() {
-    this.users = new Map();
+export class DatabaseStorage implements IStorage {
+  async createConnection(insertConnection: InsertConnection): Promise<Connection> {
+    const [connection] = await db.insert(connections).values(insertConnection).returning();
+    return connection;
   }
 
-  async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+  async getConnection(id: string): Promise<Connection | undefined> {
+    const [connection] = await db.select().from(connections).where(eq(connections.id, id));
+    return connection;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+  async getAllConnections(): Promise<Connection[]> {
+    return await db.select().from(connections);
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async updateConnection(id: string, updates: Partial<InsertConnection>): Promise<Connection | undefined> {
+    const [connection] = await db
+      .update(connections)
+      .set(updates)
+      .where(eq(connections.id, id))
+      .returning();
+    return connection;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
