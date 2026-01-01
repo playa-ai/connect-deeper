@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useConnection } from "@/context/ConnectionContext";
 import { useAudioRecorder } from "@/hooks/useAudioRecorder";
+import { useWakeLock } from "@/hooks/useWakeLock";
 import { Button } from "@/components/ui/button";
 import { getQuestions } from "@/lib/questions";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,14 +14,20 @@ export default function Recording() {
   const [, setLocation] = useLocation();
   const { data, updateData } = useConnection();
   const { isRecording, startRecording, stopRecording, audioBlob, duration } = useAudioRecorder();
+  const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
 
   const questions = getQuestions(data.vibeDepth);
 
   useEffect(() => {
+    requestWakeLock();
     startRecording();
-    return () => stopRecording();
+    
+    return () => {
+      releaseWakeLock();
+      stopRecording();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -36,7 +43,6 @@ export default function Recording() {
     
     setIsSaving(true);
     try {
-      // Convert blob to base64
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
@@ -54,6 +60,7 @@ export default function Recording() {
           questionsAsked: questions 
         });
         
+        releaseWakeLock();
         setLocation("/success");
       };
     } catch (error) {
@@ -98,9 +105,9 @@ export default function Recording() {
              transition={{ duration: 1.5, repeat: Infinity }}
              className="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"
            />
-           <span className="text-red-400 font-mono text-sm tracking-wider">REC {formatTime(duration)}</span>
+           <span className="text-red-400 font-mono text-sm tracking-wider" data-testid="text-recording-time">REC {formatTime(duration)}</span>
         </div>
-        <div className="text-muted-foreground text-sm font-medium">
+        <div className="text-muted-foreground text-sm font-medium" data-testid="text-question-progress">
           Question {currentQuestionIndex + 1} of {questions.length}
         </div>
       </div>
@@ -115,7 +122,7 @@ export default function Recording() {
             transition={{ duration: 0.5 }}
             className="space-y-6"
           >
-            <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white">
+            <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white" data-testid="text-question">
               {questions[currentQuestionIndex]}
             </h2>
             <p className="text-lg text-white/50 italic font-light">
@@ -129,6 +136,7 @@ export default function Recording() {
         <Button 
           onClick={handleNext}
           disabled={isSaving}
+          data-testid="button-next-question"
           className={`w-full h-20 text-xl font-bold rounded-full transition-all duration-300 shadow-2xl ${
             isLastQuestion 
             ? "bg-white text-black hover:bg-white/90 shadow-white/10" 

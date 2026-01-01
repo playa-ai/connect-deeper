@@ -7,10 +7,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Mic, Loader2 } from "lucide-react";
+import { ArrowRight, Mic, MicOff, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createConnection } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useSpeechRecognition } from "@/hooks/useSpeechRecognition";
 
 const formSchema = z.object({
   intention: z.string().min(5, "Intention must be at least 5 characters."),
@@ -19,8 +20,16 @@ const formSchema = z.object({
 export default function IntentionCapture() {
   const [, setLocation] = useLocation();
   const { updateData } = useConnection();
-  const [isListening, setIsListening] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const { 
+    transcript, 
+    isListening, 
+    isSupported: isSpeechSupported, 
+    startListening, 
+    stopListening,
+    resetTranscript 
+  } = useSpeechRecognition();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -29,30 +38,35 @@ export default function IntentionCapture() {
     },
   });
 
-  // Mock speech-to-text simulation
+  // Sync transcript to form
   useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    if (isListening) {
-      timeout = setTimeout(() => {
-        setIsListening(false);
-        const current = form.getValues("intention");
-        const mockText = "I want to be more present and connect deeply with the people around me this year.";
-        form.setValue("intention", current ? current + " " + mockText : mockText, { shouldValidate: true });
-      }, 3000);
+    if (transcript.trim()) {
+      const current = form.getValues("intention");
+      const newValue = current ? current + transcript : transcript.trim();
+      form.setValue("intention", newValue, { shouldValidate: true });
+      resetTranscript();
     }
-    return () => clearTimeout(timeout);
-  }, [isListening, form]);
+  }, [transcript, form, resetTranscript]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isListening) stopListening();
+    
     setIsSaving(true);
     try {
-      // Create initial connection record in database
       const connection = await createConnection({
-        hostId: "host-" + Date.now(), // Mock host ID for MVP
+        hostId: "host-" + Date.now(),
         intentionText: values.intention,
-        vibeDepth: 50, // Default, will be updated later
+        vibeDepth: 50,
         guestConsented: false,
-        guestEmail: "", // Will be filled later
+        guestEmail: "",
       });
       
       updateData({
@@ -75,7 +89,6 @@ export default function IntentionCapture() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 max-w-md mx-auto relative overflow-hidden">
-      {/* Background Ambience */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[100px]" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-accent/10 rounded-full blur-[100px]" />
@@ -91,7 +104,11 @@ export default function IntentionCapture() {
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
             2026 Intention
           </h1>
-          <p className="text-muted-foreground">Speak or type what matters most for the year ahead.</p>
+          <p className="text-muted-foreground">
+            {isSpeechSupported 
+              ? "Speak or type what matters most for the year ahead." 
+              : "Type what matters most for the year ahead."}
+          </p>
         </div>
 
         <Form {...form}>
@@ -107,27 +124,35 @@ export default function IntentionCapture() {
                       <Textarea 
                         placeholder="I want to focus on..." 
                         className="min-h-[200px] bg-white/5 border-white/10 resize-none text-2xl font-medium leading-relaxed placeholder:text-white/20 focus:border-primary/50 transition-all rounded-3xl p-6"
+                        data-testid="input-intention"
                         {...field} 
                       />
                       
-                      <div className="absolute bottom-4 right-4">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon"
-                          className={`h-12 w-12 rounded-full shadow-lg transition-all ${isListening ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30 animate-pulse' : 'bg-white/10 hover:bg-white/20'}`}
-                          onClick={() => setIsListening(!isListening)}
-                        >
-                          {isListening ? (
-                            <div className="flex items-center justify-center">
-                                <span className="absolute w-full h-full rounded-full border border-red-500 animate-ping opacity-50"></span>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                            </div>
-                          ) : (
-                            <Mic className="w-5 h-5" />
-                          )}
-                        </Button>
-                      </div>
+                      {isSpeechSupported && (
+                        <div className="absolute bottom-4 right-4">
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            size="icon"
+                            data-testid="button-voice"
+                            className={`h-14 w-14 rounded-full shadow-lg transition-all ${
+                              isListening 
+                                ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30' 
+                                : 'bg-white/10 hover:bg-white/20'
+                            }`}
+                            onClick={toggleListening}
+                          >
+                            {isListening ? (
+                              <div className="relative flex items-center justify-center">
+                                <span className="absolute w-full h-full rounded-full border-2 border-red-500 animate-ping opacity-50"></span>
+                                <MicOff className="w-6 h-6" />
+                              </div>
+                            ) : (
+                              <Mic className="w-6 h-6" />
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -143,13 +168,14 @@ export default function IntentionCapture() {
                         exit={{ opacity: 0, height: 0 }}
                         className="text-center text-sm text-primary font-medium"
                     >
-                        Listening...
+                        Listening... Speak your intention
                     </motion.div>
                 )}
             </AnimatePresence>
 
             <Button 
               type="submit" 
+              data-testid="button-continue"
               className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 transition-opacity rounded-full shadow-lg shadow-primary/25 mt-4"
               disabled={isListening || isSaving}
             >
