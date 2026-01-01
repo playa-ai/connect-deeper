@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertConnectionSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
+import { analyzeAudio, generatePosterImage } from "./analyze";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -70,6 +71,74 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error fetching connections:", error);
       res.status(500).json({ error: "Failed to fetch connections" });
+    }
+  });
+
+  // Analyze audio and generate insights
+  app.post("/api/connections/:id/analyze", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const connection = await storage.getConnection(id);
+      
+      if (!connection) {
+        return res.status(404).json({ error: "Connection not found" });
+      }
+      
+      if (!connection.audioData) {
+        return res.status(400).json({ error: "No audio data to analyze" });
+      }
+
+      const { transcript, insights, posterPrompt } = await analyzeAudio(
+        connection.audioData,
+        connection.intentionText,
+        connection.questionsAsked || []
+      );
+
+      const updatedConnection = await storage.updateConnection(id, {
+        transcript,
+        aiInsights: insights,
+        posterPrompt,
+      });
+
+      res.json({
+        transcript,
+        insights,
+        posterPrompt,
+        connection: updatedConnection,
+      });
+    } catch (error) {
+      console.error("Error analyzing audio:", error);
+      res.status(500).json({ error: "Failed to analyze audio" });
+    }
+  });
+
+  // Generate poster image
+  app.post("/api/connections/:id/poster", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const connection = await storage.getConnection(id);
+      
+      if (!connection) {
+        return res.status(404).json({ error: "Connection not found" });
+      }
+      
+      if (!connection.posterPrompt) {
+        return res.status(400).json({ error: "No poster prompt available. Run analysis first." });
+      }
+
+      const posterImageUrl = await generatePosterImage(connection.posterPrompt);
+
+      const updatedConnection = await storage.updateConnection(id, {
+        posterImageUrl,
+      });
+
+      res.json({
+        posterImageUrl,
+        connection: updatedConnection,
+      });
+    } catch (error) {
+      console.error("Error generating poster:", error);
+      res.status(500).json({ error: "Failed to generate poster" });
     }
   });
 

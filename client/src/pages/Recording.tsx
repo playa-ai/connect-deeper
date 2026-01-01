@@ -61,7 +61,7 @@ export default function Recording() {
         });
         
         releaseWakeLock();
-        setLocation("/success");
+        setLocation("/results");
       };
     } catch (error) {
       console.error("Error saving recording:", error);

@@ -36,9 +36,29 @@ export const connections = pgTable("connections", {
   npsScore: integer("nps_score"),
   feedbackText: text("feedback_text"),
   
+  // AI Analysis
+  transcript: text("transcript"),
+  aiInsights: text("ai_insights"),
+  posterPrompt: text("poster_prompt"),
+  posterImageUrl: text("poster_image_url"),
+  
   // Follow-up
   reminderSent: boolean("reminder_sent").notNull().default(false),
   reminderSentAt: timestamp("reminder_sent_at"),
+});
+
+export const conversations = pgTable("conversations", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  title: text("title").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  conversationId: integer("conversation_id").notNull(),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertConnectionSchema = createInsertSchema(connections).omit({

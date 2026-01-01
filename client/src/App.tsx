@@ -15,7 +15,7 @@ function Router() {
       <Route path="/capture" component={IntentionCapture} />
       <Route path="/consent" component={ConsentVibe} />
       <Route path="/recording" component={Recording} />
-      <Route path="/success" component={Results} />
+      <Route path="/results" component={Results} />
       <Route component={NotFound} />
     </Switch>
   );

@@ -49,3 +49,43 @@ export async function getAllConnections(): Promise<Connection[]> {
   
   return response.json();
 }
+
+export interface AnalysisResult {
+  transcript: string;
+  insights: string;
+  posterPrompt: string;
+  connection: Connection;
+}
+
+export async function analyzeConnection(id: string): Promise<AnalysisResult> {
+  const response = await fetch(`/api/connections/${id}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to analyze connection");
+  }
+  
+  return response.json();
+}
+
+export interface PosterResult {
+  posterImageUrl: string;
+  connection: Connection;
+}
+
+export async function generatePoster(id: string): Promise<PosterResult> {
+  const response = await fetch(`/api/connections/${id}/poster`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to generate poster");
+  }
+  
+  return response.json();
+}
