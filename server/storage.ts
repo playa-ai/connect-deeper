@@ -5,14 +5,31 @@ import { connections, type Connection, type InsertConnection } from "@shared/sch
 import { eq } from "drizzle-orm";
 
 const isProduction = process.env.NODE_ENV === "production";
+const isDeployment = process.env.REPLIT_DEPLOYMENT === "1";
+const databaseUrl = process.env.DATABASE_URL;
+
+if (!databaseUrl) {
+  console.error("DATABASE_URL is not set!");
+} else {
+  try {
+    const urlHost = new URL(databaseUrl).hostname;
+    console.log(`Database connection: host=${urlHost}, production=${isProduction}, deployment=${isDeployment}`);
+  } catch (e) {
+    console.error("Invalid DATABASE_URL format");
+  }
+}
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: isProduction ? { rejectUnauthorized: false } : false,
+  connectionString: databaseUrl,
+  ssl: (isProduction || isDeployment) ? { rejectUnauthorized: false } : undefined,
 });
 
 pool.on("error", (err) => {
   console.error("Unexpected database pool error:", err);
+});
+
+pool.on("connect", () => {
+  console.log("Database pool connected successfully");
 });
 
 const db = drizzle(pool);
