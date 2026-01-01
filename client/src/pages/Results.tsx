@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
 import { Share2, Download, Sparkles, Loader2, ArrowRight } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
@@ -21,6 +22,10 @@ export default function Results() {
   const { data, updateData, reset } = useConnection();
   const [processingState, setProcessingState] = useState<'analyzing' | 'generating' | 'complete'>('analyzing');
   const [posterData, setPosterData] = useState<PosterData | null>(null);
+  
+  // Feedback State
+  const [nps, setNps] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState("");
 
   // Email form
   const form = useForm<z.infer<typeof emailSchema>>({
@@ -47,18 +52,30 @@ export default function Results() {
     };
   }, [data.vibeDepth, data.intentionText]);
 
-  const handleFinish = (values: z.infer<typeof emailSchema>) => {
+  const handleEmailSubmit = (values: z.infer<typeof emailSchema>) => {
     updateData({ guestEmail: values.email });
     toast({
       title: "Poster Sent!",
       description: `We've emailed your connection poster to ${values.email}`,
     });
+  };
+
+  const handleDone = () => {
+    updateData({
+        npsScore: nps,
+        feedbackText: feedback,
+    });
     
-    // Reset and go home after delay
+    // Simulate save
+    toast({
+        title: "Session Saved",
+        description: "Thank you for connecting.",
+    });
+
     setTimeout(() => {
       reset();
       setLocation("/");
-    }, 2000);
+    }, 1500);
   };
 
   const handleShare = () => {
@@ -102,7 +119,7 @@ export default function Results() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md space-y-8"
+        className="w-full max-w-md space-y-8 pb-12"
       >
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-white">Your Connection Artifact</h1>
@@ -149,44 +166,86 @@ export default function Results() {
           </div>
         </div>
 
-        {/* Email Capture & Actions */}
-        <div className="space-y-6 pt-4">
-          <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
-             <div className="text-center space-y-1">
-               <h3 className="font-medium text-white">Save this memory</h3>
-               <p className="text-sm text-muted-foreground">Enter your email to receive this poster</p>
-             </div>
-             
-             <Form {...form}>
-               <form onSubmit={form.handleSubmit(handleFinish)} className="flex gap-2">
-                 <FormField
-                   control={form.control}
-                   name="email"
-                   render={({ field }) => (
-                     <FormItem className="flex-1">
-                       <FormControl>
-                         <Input placeholder="your@email.com" {...field} className="bg-black/20 border-white/10 text-white" />
-                       </FormControl>
-                       <FormMessage />
-                     </FormItem>
-                   )}
-                 />
-                 <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90">
-                   <ArrowRight className="w-4 h-4" />
-                 </Button>
-               </form>
-             </Form>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-             <Button variant="outline" onClick={handleShare} className="h-12 border-white/10 hover:bg-white/5">
-                <Share2 className="mr-2 w-4 h-4" /> Share
-             </Button>
-             <Button variant="outline" className="h-12 border-white/10 hover:bg-white/5">
-                <Download className="mr-2 w-4 h-4" /> Save Image
-             </Button>
-          </div>
+        {/* Action Buttons */}
+        <div className="grid grid-cols-2 gap-4">
+            <Button variant="outline" onClick={handleShare} className="h-12 border-white/10 hover:bg-white/5">
+            <Share2 className="mr-2 w-4 h-4" /> Share
+            </Button>
+            <Button variant="outline" className="h-12 border-white/10 hover:bg-white/5">
+            <Download className="mr-2 w-4 h-4" /> Save Image
+            </Button>
         </div>
+
+        {/* Email Capture */}
+        <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
+            <div className="text-center space-y-1">
+            <h3 className="font-medium text-white">Save this memory</h3>
+            <p className="text-sm text-muted-foreground">Enter your email to receive this poster</p>
+            </div>
+            
+            <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleEmailSubmit)} className="flex gap-2">
+                <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                    <FormItem className="flex-1">
+                    <FormControl>
+                        <Input placeholder="your@email.com" {...field} className="bg-black/20 border-white/10 text-white" />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+                />
+                <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90">
+                <ArrowRight className="w-4 h-4" />
+                </Button>
+            </form>
+            </Form>
+        </div>
+
+        {/* Feedback Section */}
+        <div className="space-y-6 border-t border-white/10 pt-8">
+             <div className="space-y-3">
+                <label className="text-sm font-medium text-white/80 block text-center">
+                    How was this experience?
+                </label>
+                <div className="flex justify-between items-center px-2">
+                    <span className="text-2xl grayscale opacity-50">😐</span>
+                    <div className="flex gap-2 overflow-x-auto py-2 px-2 mask-linear no-scrollbar">
+                        {[1,2,3,4,5].map((num) => (
+                            <button
+                                key={num}
+                                onClick={() => setNps(num * 2)} // Mapping 1-5 to 2-10 scale roughly or just use 1-5
+                                className={`w-10 h-10 rounded-full font-bold text-sm transition-all flex items-center justify-center flex-shrink-0 ${
+                                    (nps || 0) / 2 === num 
+                                    ? "bg-accent text-black scale-110 shadow-lg shadow-accent/30" 
+                                    : "bg-white/5 text-muted-foreground hover:bg-white/10"
+                                }`}
+                            >
+                                {num}
+                            </button>
+                        ))}
+                    </div>
+                    <span className="text-2xl">🤩</span>
+                </div>
+             </div>
+
+             <Textarea 
+                placeholder="Any thoughts on how we can improve?" 
+                className="bg-black/20 border-white/10 min-h-[80px] rounded-xl text-sm"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+            />
+
+            <Button 
+                onClick={handleDone}
+                className="w-full h-14 text-lg font-bold bg-white text-black hover:bg-white/90 rounded-full"
+            >
+                Start New Connection
+            </Button>
+        </div>
+
       </motion.div>
     </div>
   );
