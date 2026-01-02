@@ -23,11 +23,11 @@ export default function Home() {
             </div>
 
             <h1 className="text-5xl md:text-7xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/50 pb-2">
-                Burn<br/>Together.
+                Connect<br/>Deeper.
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed">
-                A stranger is just a gift you haven't unwrapped yet. Ready to exchange some cosmic intentions?
+                Lead with value, consent follows naturally. Capture intentions and meaningful conversations.
             </p>
 
             <div className="pt-8">
@@ -35,7 +35,7 @@ export default function Home() {
                     onClick={() => setLocation("/capture")}
                     className="w-full h-16 text-xl font-semibold bg-white text-black hover:bg-white/90 hover:scale-[1.02] transition-all rounded-full shadow-[0_0_30px_rgba(255,255,255,0.2)]"
                 >
-                    Let's Play <ArrowRight className="ml-2 w-6 h-6" />
+                    Start Connection <ArrowRight className="ml-2 w-6 h-6" />
                 </Button>
             </div>
         </motion.div>

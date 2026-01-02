@@ -69,9 +69,9 @@ export default function ConsentVibe() {
         className="w-full space-y-10"
       >
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white">Choose Your Adventure</h1>
+          <h1 className="text-4xl font-bold text-white">Ready to go deeper?</h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            How deep do you want to go? We're about to record some magic. Your words, your consent, your journey.
+            We'll record a 3-minute conversation. Your words stay private unless you choose to share them.
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function ConsentVibe() {
               </>
             ) : (
               <>
-                I'm Ready <Mic className="ml-3 w-6 h-6" />
+                Let's Connect <Mic className="ml-3 w-6 h-6" />
               </>
             )}
           </Button>
@@ -120,7 +120,7 @@ export default function ConsentVibe() {
             disabled={isSaving}
             className="w-full text-muted-foreground hover:text-white"
           >
-            Maybe next sunrise
+            Not this time
           </Button>
         </div>
       </motion.div>
