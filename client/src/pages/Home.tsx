@@ -27,8 +27,23 @@ export default function Home() {
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed">
-                Lead with value, consent follows naturally. Capture intentions and meaningful conversations.
+                A simple way to have a meaningful conversation. One person asks, the other answers — you'll record a few questions together.
             </p>
+            
+            <div className="text-left space-y-3 text-muted-foreground text-sm bg-white/5 p-4 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <span className="text-primary font-bold">1.</span>
+                <span>Set your intention for the conversation</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-primary font-bold">2.</span>
+                <span>Choose fun or meaningful questions</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="text-primary font-bold">3.</span>
+                <span>One person asks, the other answers — record it all</span>
+              </div>
+            </div>
 
             <div className="pt-8">
                 <Button 

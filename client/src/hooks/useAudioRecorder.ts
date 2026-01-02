@@ -38,11 +38,13 @@ export const useAudioRecorder = () => {
       
       mediaRecorder.start();
       setIsRecording(true);
+      setDuration(0);
       startTimeRef.current = Date.now();
       
       timerRef.current = setInterval(() => {
-        setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        setDuration(elapsed);
+      }, 500);
       
     } catch (err) {
       console.error("Error starting recording:", err);

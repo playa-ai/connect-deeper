@@ -126,7 +126,7 @@ export default function Recording() {
               {questions[currentQuestionIndex]}
             </h2>
             <p className="text-lg text-white/50 italic font-light">
-              Both share, then tap Next
+              Ask, listen, then tap Next
             </p>
           </motion.div>
         </AnimatePresence>
