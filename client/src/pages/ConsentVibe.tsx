@@ -77,9 +77,8 @@ export default function ConsentVibe() {
 
         <div className="space-y-8 bg-white/5 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
           <div className="flex justify-between items-center text-sm font-medium tracking-widest uppercase text-muted-foreground">
-            <span className={vibeLevel === 'light' ? 'text-primary' : ''}>Light</span>
-            <span className={vibeLevel === 'middle' ? 'text-primary' : ''}>Middle</span>
-            <span className={vibeLevel === 'deep' ? 'text-primary' : ''}>Deep</span>
+            <span className={vibeLevel === 'fun' ? 'text-primary' : ''}>Fun</span>
+            <span className={vibeLevel === 'meaningful' ? 'text-primary' : ''}>Meaningful</span>
           </div>
           
           <Slider
