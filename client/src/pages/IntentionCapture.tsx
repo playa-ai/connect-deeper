@@ -101,12 +101,12 @@ export default function IntentionCapture() {
       >
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-            2026 Intention
+            What's Your 2026 Offering?
           </h1>
           <p className="text-muted-foreground">
             {isSpeechSupported 
-              ? "Speak or type what matters most for the year ahead." 
-              : "Type what matters most for the year ahead."}
+              ? "Whisper it, scream it, or type it. The playa wants to know your wildest intention." 
+              : "The playa wants to know your wildest intention for the year ahead."}
           </p>
         </div>
 

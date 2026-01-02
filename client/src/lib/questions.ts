@@ -2,19 +2,19 @@ export type VibeLevel = 'light' | 'middle' | 'deep';
 
 export const QUESTIONS: Record<VibeLevel, string[]> = {
   light: [
-    "What do you need more of in 2026?",
-    "What's something about you that would surprise me?",
-    "What gift could you give me right now that costs nothing?"
+    "What magic do you want more of in 2026?",
+    "What's the weirdest thing that makes you feel alive?",
+    "What gift can you give me right now that money can't buy?"
   ],
   middle: [
-    "What would make 2026 your best year yet?",
-    "What's a risk you want to take this year?",
-    "What do you hope we both remember from this conversation?"
+    "If 2026 was your masterpiece, what would it look like?",
+    "What beautiful risk is calling your name this year?",
+    "When we meet again on the playa, what will we remember about this moment?"
   ],
   deep: [
-    "What needs to change in your life for that intention to happen?",
-    "What are you ready to let go of?",
-    "What do you need to hear right now that you haven't heard enough?"
+    "What sacred fire needs to burn for your intention to rise from the ashes?",
+    "What are you finally ready to release into the desert wind?",
+    "What truth do you need to hear that no one has been brave enough to tell you?"
   ]
 };
 

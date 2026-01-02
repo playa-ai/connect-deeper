@@ -126,7 +126,7 @@ export default function Recording() {
               {questions[currentQuestionIndex]}
             </h2>
             <p className="text-lg text-white/50 italic font-light">
-              Both share, then tap Next
+              Take turns, speak from the heart, then pass the torch
             </p>
           </motion.div>
         </AnimatePresence>
