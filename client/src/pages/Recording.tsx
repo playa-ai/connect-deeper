@@ -6,7 +6,7 @@ import { useWakeLock } from "@/hooks/useWakeLock";
 import { Button } from "@/components/ui/button";
 import { getQuestions } from "@/lib/questions";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Mic, AlertCircle } from "lucide-react";
 import { updateConnection } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -17,12 +17,32 @@ export default function Recording() {
   const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [micError, setMicError] = useState<string | null>(null);
+  const [recordingStarted, setRecordingStarted] = useState(false);
 
   const questions = getQuestions(data.vibeDepth);
 
   useEffect(() => {
-    requestWakeLock();
-    startRecording();
+    const initRecording = async () => {
+      try {
+        requestWakeLock();
+        await startRecording();
+        setRecordingStarted(true);
+        setMicError(null);
+      } catch (err: any) {
+        console.error("Microphone error:", err);
+        releaseWakeLock();
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          setMicError("Please allow microphone access to record your conversation.");
+        } else if (err.name === 'NotFoundError') {
+          setMicError("No microphone found. Please connect a microphone.");
+        } else {
+          setMicError("Unable to access microphone. Please check your settings.");
+        }
+      }
+    };
+    
+    initRecording();
     
     return () => {
       releaseWakeLock();
@@ -100,58 +120,84 @@ export default function Recording() {
 
       <div className="flex justify-between items-center py-6">
         <div className="flex items-center gap-2">
-           <motion.div 
-             animate={{ scale: [1, 1.2, 1] }}
-             transition={{ duration: 1.5, repeat: Infinity }}
-             className="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"
-           />
-           <span className="text-red-400 font-mono text-sm tracking-wider" data-testid="text-recording-time">REC {formatTime(duration)}</span>
+           {recordingStarted && !micError ? (
+             <>
+               <motion.div 
+                 animate={{ scale: [1, 1.2, 1] }}
+                 transition={{ duration: 1.5, repeat: Infinity }}
+                 className="w-3 h-3 bg-red-500 rounded-full shadow-[0_0_10px_rgba(239,68,68,0.6)]"
+               />
+               <span className="text-red-400 font-mono text-sm tracking-wider" data-testid="text-recording-time">REC {formatTime(duration)}</span>
+             </>
+           ) : (
+             <span className="text-yellow-400 font-mono text-sm tracking-wider">WAITING...</span>
+           )}
         </div>
         <div className="text-muted-foreground text-sm font-medium" data-testid="text-question-progress">
           Question {currentQuestionIndex + 1} of {questions.length}
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col justify-center items-center text-center space-y-12">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentQuestionIndex}
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-            transition={{ duration: 0.5 }}
-            className="space-y-6"
+      {micError ? (
+        <div className="flex-1 flex flex-col justify-center items-center text-center space-y-8 px-4">
+          <div className="p-4 bg-red-500/20 rounded-full">
+            <AlertCircle className="w-12 h-12 text-red-400" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white">Microphone Access Needed</h2>
+            <p className="text-muted-foreground">{micError}</p>
+          </div>
+          <Button 
+            onClick={() => window.location.reload()}
+            className="bg-white text-black hover:bg-white/90"
           >
-            <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white" data-testid="text-question">
-              {questions[currentQuestionIndex]}
-            </h2>
-            <p className="text-lg text-white/50 italic font-light">
-              Ask, listen, then tap Next
-            </p>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+            <Mic className="mr-2 w-4 h-4" /> Try Again
+          </Button>
+        </div>
+      ) : (
+        <div className="flex-1 flex flex-col justify-center items-center text-center space-y-12">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentQuestionIndex}
+              initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6"
+            >
+              <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white" data-testid="text-question">
+                {questions[currentQuestionIndex]}
+              </h2>
+              <p className="text-lg text-white/50 italic font-light">
+                Ask, listen, then tap Next
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+      )}
 
-      <div className="py-8">
-        <Button 
-          onClick={handleNext}
-          disabled={isSaving}
-          data-testid="button-next-question"
-          className={`w-full h-20 text-xl font-bold rounded-full transition-all duration-300 shadow-2xl ${
-            isLastQuestion 
-            ? "bg-white text-black hover:bg-white/90 shadow-white/10" 
-            : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10"
-          }`}
-        >
-          {isSaving ? (
-            <span>Saving...</span>
-          ) : isLastQuestion ? (
-            <span className="flex items-center gap-3">Finish <Check className="w-6 h-6" /></span>
-          ) : (
-            <span className="flex items-center gap-3">Next Question <ArrowRight className="w-6 h-6" /></span>
-          )}
-        </Button>
-      </div>
+      {!micError && (
+        <div className="py-8">
+          <Button 
+            onClick={handleNext}
+            disabled={isSaving || !recordingStarted}
+            data-testid="button-next-question"
+            className={`w-full h-20 text-xl font-bold rounded-full transition-all duration-300 shadow-2xl ${
+              isLastQuestion 
+              ? "bg-white text-black hover:bg-white/90 shadow-white/10" 
+              : "bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/10"
+            }`}
+          >
+            {isSaving ? (
+              <span>Saving...</span>
+            ) : isLastQuestion ? (
+              <span className="flex items-center gap-3">Finish <Check className="w-6 h-6" /></span>
+            ) : (
+              <span className="flex items-center gap-3">Next Question <ArrowRight className="w-6 h-6" /></span>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -132,14 +132,19 @@ export default function Results() {
   };
 
   const handleShare = () => {
+    const shareUrl = data.connectionId 
+      ? `${window.location.origin}/connection/${data.connectionId}`
+      : window.location.origin;
+      
     if (navigator.share) {
       navigator.share({
         title: 'My 2026 Connection',
         text: `My intention for 2026: ${data.intentionText}`,
-        url: window.location.origin,
+        url: shareUrl,
       }).catch(console.error);
     } else {
-      toast({ title: "Copied to clipboard" });
+      navigator.clipboard.writeText(shareUrl);
+      toast({ title: "Link copied to clipboard!" });
     }
   };
 
