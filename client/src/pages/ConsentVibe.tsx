@@ -3,8 +3,8 @@ import { useLocation } from "wouter";
 import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { motion } from "framer-motion";
-import { Mic, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mic, Loader2, Sparkles, Heart } from "lucide-react";
 import { getVibeLevel } from "@/lib/questions";
 import { updateConnection } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
@@ -75,10 +75,25 @@ export default function ConsentVibe() {
           </p>
         </div>
 
-        <div className="space-y-8 bg-white/5 p-8 rounded-3xl border border-white/5 backdrop-blur-sm">
-          <div className="flex justify-between items-center text-sm font-medium tracking-widest uppercase text-muted-foreground">
-            <span className={vibeLevel === 'fun' ? 'text-primary' : ''}>Fun</span>
-            <span className={vibeLevel === 'meaningful' ? 'text-primary' : ''}>Meaningful</span>
+        <div className="space-y-6 bg-gradient-to-br from-white/10 to-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-sm shadow-xl">
+          <div className="flex justify-between items-center">
+            <motion.div 
+              className={`flex flex-col items-center gap-2 transition-all duration-300 ${vibeLevel === 'fun' ? 'scale-110' : 'opacity-50'}`}
+            >
+              <div className={`p-3 rounded-2xl ${vibeLevel === 'fun' ? 'bg-yellow-500/20 ring-2 ring-yellow-400' : 'bg-white/5'}`}>
+                <Sparkles className={`w-6 h-6 ${vibeLevel === 'fun' ? 'text-yellow-400' : 'text-muted-foreground'}`} />
+              </div>
+              <span className={`text-sm font-bold tracking-wide ${vibeLevel === 'fun' ? 'text-yellow-400' : 'text-muted-foreground'}`}>FUN</span>
+            </motion.div>
+            
+            <motion.div 
+              className={`flex flex-col items-center gap-2 transition-all duration-300 ${vibeLevel === 'meaningful' ? 'scale-110' : 'opacity-50'}`}
+            >
+              <div className={`p-3 rounded-2xl ${vibeLevel === 'meaningful' ? 'bg-pink-500/20 ring-2 ring-pink-400' : 'bg-white/5'}`}>
+                <Heart className={`w-6 h-6 ${vibeLevel === 'meaningful' ? 'text-pink-400' : 'text-muted-foreground'}`} />
+              </div>
+              <span className={`text-sm font-bold tracking-wide ${vibeLevel === 'meaningful' ? 'text-pink-400' : 'text-muted-foreground'}`}>MEANINGFUL</span>
+            </motion.div>
           </div>
           
           <Slider
@@ -89,11 +104,24 @@ export default function ConsentVibe() {
             className="py-4"
           />
 
-          <div className="text-center">
-            <span className="inline-block px-4 py-1 rounded-full bg-white/10 text-white font-medium text-sm">
-              Current Vibe: {vibeLevel.charAt(0).toUpperCase() + vibeLevel.slice(1)}
-            </span>
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={vibeLevel}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="text-center space-y-2"
+            >
+              <span className={`inline-block px-5 py-2 rounded-full font-semibold text-sm ${
+                vibeLevel === 'fun' 
+                  ? 'bg-yellow-500/20 text-yellow-300' 
+                  : 'bg-pink-500/20 text-pink-300'
+              }`}>
+                {vibeLevel === 'fun' ? 'Light & playful questions' : 'Deep & reflective questions'}
+              </span>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         <div className="space-y-4 pt-4">

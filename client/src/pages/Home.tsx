@@ -1,10 +1,18 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
+import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Sparkles, ArrowRight } from "lucide-react";
 
 export default function Home() {
   const [, setLocation] = useLocation();
+  const { reset } = useConnection();
+
+  useEffect(() => {
+    reset();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
