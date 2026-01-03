@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 export const useAudioRecorder = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -7,21 +7,35 @@ export const useAudioRecorder = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const startTimeRef = useRef<number>(0);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (mediaRecorderRef.current && isRecording) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
+        mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
       }
     };
-  }, [isRecording]);
+  }, []);
 
   const startRecording = async () => {
     try {
+      clearTimer();
+      setDuration(0);
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream); // Browser might not support options, default is usually fine
+      const mediaRecorder = new MediaRecorder(stream);
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -34,11 +48,11 @@ export const useAudioRecorder = () => {
         const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
         setAudioBlob(blob);
         chunksRef.current = [];
+        clearTimer();
       };
       
       mediaRecorder.start();
       setIsRecording(true);
-      setDuration(0);
       startTimeRef.current = Date.now();
       
       timerRef.current = setInterval(() => {
@@ -48,23 +62,19 @@ export const useAudioRecorder = () => {
       
     } catch (err) {
       console.error("Error starting recording:", err);
-      // Handle permission error specifically if needed
       throw err;
     }
   };
 
-  const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
+  const stopRecording = useCallback(() => {
+    clearTimer();
+    
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
-      setIsRecording(false);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-      // Stop all tracks to release microphone
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
     }
-  };
+    setIsRecording(false);
+  }, [clearTimer]);
 
   return { isRecording, audioBlob, duration, startRecording, stopRecording };
 };
