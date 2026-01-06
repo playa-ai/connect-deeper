@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertConnectionSchema } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
-import { analyzeAudio, generatePosterImage } from "./analyze";
+import { analyzeAudio, generatePosterImage, generateFollowUp } from "./analyze";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -139,6 +139,33 @@ export async function registerRoutes(
     } catch (error) {
       console.error("Error generating poster:", error);
       res.status(500).json({ error: "Failed to generate poster" });
+    }
+  });
+
+  // Generate follow-up suggestions
+  app.post("/api/connections/:id/followup", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const connection = await storage.getConnection(id);
+      
+      if (!connection) {
+        return res.status(404).json({ error: "Connection not found" });
+      }
+      
+      if (!connection.transcript) {
+        return res.status(400).json({ error: "No transcript available. Run analysis first." });
+      }
+
+      const followUp = await generateFollowUp(
+        connection.intentionText,
+        connection.transcript,
+        connection.aiInsights || ""
+      );
+
+      res.json(followUp);
+    } catch (error) {
+      console.error("Error generating follow-up:", error);
+      res.status(500).json({ error: "Failed to generate follow-up suggestions" });
     }
   });
 

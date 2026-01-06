@@ -113,6 +113,81 @@ Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`
   };
 }
 
+export interface FollowUpResult {
+  deeperQuestions: string[];
+  topicsToExplore: string[];
+  actionItems: string[];
+}
+
+export async function generateFollowUp(
+  intentionText: string,
+  transcript: string,
+  insights: string
+): Promise<FollowUpResult> {
+  const response = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Based on this conversation about someone's 2026 intention, generate follow-up suggestions to continue the connection RIGHT NOW while you're still together.
+
+Intention: "${intentionText}"
+
+Conversation transcript:
+${transcript}
+
+Insights: ${insights}
+
+Generate exactly:
+1. THREE deeper questions to ask each other right now (open-ended, personal, builds on what was shared)
+2. THREE topics to explore together in the moment (activities, shared interests mentioned, experiences)
+3. THREE immediate action items to do before parting ways (exchange info, make plans, commitments)
+
+Format your response EXACTLY like this (use this exact format with the headers):
+DEEPER_QUESTIONS:
+- [question 1]
+- [question 2]
+- [question 3]
+
+TOPICS_TO_EXPLORE:
+- [topic 1]
+- [topic 2]
+- [topic 3]
+
+ACTION_ITEMS:
+- [action 1]
+- [action 2]
+- [action 3]
+
+Be warm, specific to their conversation, and encourage immediate action while they're still together.`,
+          },
+        ],
+      },
+    ],
+  });
+
+  const text = response.text || "";
+  
+  const parseSection = (header: string): string[] => {
+    const regex = new RegExp(`${header}:\\s*\\n([\\s\\S]*?)(?=\\n[A-Z_]+:|$)`, 'i');
+    const match = text.match(regex);
+    if (!match) return [];
+    return match[1]
+      .split('\n')
+      .map(line => line.replace(/^[-*]\s*/, '').trim())
+      .filter(line => line.length > 0)
+      .slice(0, 3);
+  };
+
+  return {
+    deeperQuestions: parseSection('DEEPER_QUESTIONS'),
+    topicsToExplore: parseSection('TOPICS_TO_EXPLORE'),
+    actionItems: parseSection('ACTION_ITEMS'),
+  };
+}
+
 export async function generatePosterImage(prompt: string): Promise<string> {
   const { Modality } = await import("@google/genai");
   

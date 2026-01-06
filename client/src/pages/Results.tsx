@@ -5,13 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { Share2, Download, Sparkles, Loader2, ArrowRight } from "lucide-react";
+import { Share2, Download, Sparkles, Loader2, ArrowRight, MessageCircle, Compass, Zap, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { updateConnection, analyzeConnection, generatePoster } from "@/lib/api";
+import { updateConnection, analyzeConnection, generatePoster, getFollowUp, FollowUpResult } from "@/lib/api";
 import { getVibeLevel } from "@/lib/questions";
 
 const emailSchema = z.object({
@@ -27,6 +27,10 @@ export default function Results() {
   const [transcript, setTranscript] = useState("");
   const [insights, setInsights] = useState("");
   const [posterImageUrl, setPosterImageUrl] = useState<string | null>(null);
+  
+  const [followUp, setFollowUp] = useState<FollowUpResult | null>(null);
+  const [loadingFollowUp, setLoadingFollowUp] = useState(false);
+  const [showFollowUp, setShowFollowUp] = useState(true);
   
   const [nps, setNps] = useState<number | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -70,6 +74,23 @@ export default function Results() {
   useEffect(() => {
     runAnalysis();
   }, [data.connectionId]);
+
+  useEffect(() => {
+    if (processingState === 'complete' && data.connectionId && !followUp && !loadingFollowUp) {
+      const loadFollowUp = async () => {
+        setLoadingFollowUp(true);
+        try {
+          const followUpData = await getFollowUp(data.connectionId!);
+          setFollowUp(followUpData);
+        } catch (followUpError) {
+          console.error("Follow-up generation failed:", followUpError);
+        } finally {
+          setLoadingFollowUp(false);
+        }
+      };
+      loadFollowUp();
+    }
+  }, [processingState, data.connectionId, followUp, loadingFollowUp]);
 
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
     if (!data.connectionId) return;
@@ -266,6 +287,99 @@ export default function Results() {
             </p>
           </div>
         )}
+
+        <div className="space-y-4 bg-gradient-to-br from-primary/10 to-accent/5 p-6 rounded-2xl border border-primary/20">
+          <button 
+            onClick={() => setShowFollowUp(!showFollowUp)}
+            className="w-full flex items-center justify-between"
+            data-testid="button-toggle-followup"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/20 rounded-xl">
+                <Zap className="w-5 h-5 text-primary" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-bold text-white">Continue the Connection</h3>
+                <p className="text-sm text-muted-foreground">Don't stop now — go deeper together</p>
+              </div>
+            </div>
+            {showFollowUp ? (
+              <ChevronUp className="w-5 h-5 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-muted-foreground" />
+            )}
+          </button>
+          
+          {showFollowUp && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="space-y-6 pt-4"
+            >
+              {loadingFollowUp ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                  <span className="ml-3 text-muted-foreground">Generating personalized suggestions...</span>
+                </div>
+              ) : followUp ? (
+                <>
+                  {followUp.deeperQuestions.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4 text-pink-400" />
+                        <h4 className="text-sm font-semibold text-pink-400 uppercase tracking-wide">Ask Right Now</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {followUp.deeperQuestions.map((q, i) => (
+                          <div key={i} className="p-3 bg-white/5 rounded-xl text-white/90 text-sm" data-testid={`text-deeper-question-${i}`}>
+                            "{q}"
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {followUp.topicsToExplore.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Compass className="w-4 h-4 text-blue-400" />
+                        <h4 className="text-sm font-semibold text-blue-400 uppercase tracking-wide">Explore Together</h4>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {followUp.topicsToExplore.map((topic, i) => (
+                          <span key={i} className="px-3 py-2 bg-blue-500/10 text-blue-300 rounded-full text-sm" data-testid={`text-topic-${i}`}>
+                            {topic}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  {followUp.actionItems.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-yellow-400" />
+                        <h4 className="text-sm font-semibold text-yellow-400 uppercase tracking-wide">Before You Part Ways</h4>
+                      </div>
+                      <div className="space-y-2">
+                        {followUp.actionItems.map((action, i) => (
+                          <div key={i} className="flex items-start gap-3 p-3 bg-yellow-500/10 rounded-xl" data-testid={`text-action-${i}`}>
+                            <div className="w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <span className="text-yellow-400 text-xs font-bold">{i + 1}</span>
+                            </div>
+                            <span className="text-yellow-200/90 text-sm">{action}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-muted-foreground text-center py-4">Could not generate suggestions</p>
+              )}
+            </motion.div>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <Button variant="outline" onClick={handleShare} className="h-12 border-white/10 hover:bg-white/5" data-testid="button-share">

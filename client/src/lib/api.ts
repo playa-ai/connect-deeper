@@ -89,3 +89,23 @@ export async function generatePoster(id: string): Promise<PosterResult> {
   
   return response.json();
 }
+
+export interface FollowUpResult {
+  deeperQuestions: string[];
+  topicsToExplore: string[];
+  actionItems: string[];
+}
+
+export async function getFollowUp(id: string): Promise<FollowUpResult> {
+  const response = await fetch(`/api/connections/${id}/followup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+  });
+  
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to generate follow-up suggestions");
+  }
+  
+  return response.json();
+}

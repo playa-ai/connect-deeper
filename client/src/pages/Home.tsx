@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
@@ -9,10 +8,10 @@ export default function Home() {
   const [, setLocation] = useLocation();
   const { reset } = useConnection();
 
-  useEffect(() => {
+  const handleStart = () => {
     reset();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    setLocation("/ground");
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
@@ -55,8 +54,9 @@ export default function Home() {
 
             <div className="pt-8">
                 <Button 
-                    onClick={() => setLocation("/capture")}
+                    onClick={handleStart}
                     className="w-full h-16 text-xl font-semibold bg-white text-black hover:bg-white/90 hover:scale-[1.02] transition-all rounded-full shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                    data-testid="button-start-connection"
                 >
                     Start Connection <ArrowRight className="ml-2 w-6 h-6" />
                 </Button>

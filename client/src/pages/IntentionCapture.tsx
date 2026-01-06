@@ -73,7 +73,7 @@ export default function IntentionCapture() {
         intentionText: values.intention,
       });
       
-      setLocation("/consent");
+      setLocation("/guest-ground");
     } catch (error) {
       console.error("Error saving intention:", error);
       toast({
