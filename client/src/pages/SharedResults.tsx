@@ -38,11 +38,12 @@ export default function SharedResults() {
 
   const handleShare = () => {
     const shareUrl = window.location.href;
+    const intention = connection?.intentionSummary || connection?.intentionText;
     if (navigator.share) {
       navigator.share({
         title: 'Connection Memory',
-        text: connection?.intentionText 
-          ? `My intention for 2026: ${connection.intentionText}`
+        text: intention 
+          ? `My intention for 2026: ${intention}`
           : 'Check out this connection memory!',
         url: shareUrl,
       }).catch(console.error);
@@ -100,11 +101,13 @@ export default function SharedResults() {
           <h1 className="text-3xl font-bold text-white">2026 Intention</h1>
         </div>
 
-        <div className="bg-gradient-to-br from-primary/20 to-primary/5 p-6 rounded-3xl border border-primary/20">
-          <p className="text-xl text-white font-medium text-center italic" data-testid="text-shared-intention">
-            "{connection.intentionText}"
-          </p>
-        </div>
+        {(connection.intentionSummary || connection.intentionText) && (
+          <div className="bg-gradient-to-br from-primary/20 to-primary/5 p-6 rounded-3xl border border-primary/20">
+            <p className="text-xl text-white font-medium text-center italic" data-testid="text-shared-intention">
+              "{connection.intentionSummary || connection.intentionText}"
+            </p>
+          </div>
+        )}
 
         {connection.aiInsights && (
           <div className="space-y-3">

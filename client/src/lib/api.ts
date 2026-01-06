@@ -52,6 +52,7 @@ export async function getAllConnections(): Promise<Connection[]> {
 
 export interface AnalysisResult {
   transcript: string;
+  intentionSummary: string;
   insights: string;
   posterPrompt: string;
   connection: Connection;

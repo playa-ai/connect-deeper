@@ -38,6 +38,7 @@ export const connections = pgTable("connections", {
   
   // AI Analysis
   transcript: text("transcript"),
+  intentionSummary: text("intention_summary"),
   aiInsights: text("ai_insights"),
   posterPrompt: text("poster_prompt"),
   posterImageUrl: text("poster_image_url"),

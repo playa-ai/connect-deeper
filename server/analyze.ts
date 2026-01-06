@@ -10,6 +10,7 @@ const ai = new GoogleGenAI({
 
 export interface AnalysisResult {
   transcript: string;
+  intentionSummary: string;
   insights: string;
   posterPrompt: string;
 }
@@ -42,7 +43,7 @@ export async function analyzeAudio(
             },
           },
           {
-            text: `Transcribe this audio conversation. The conversation is about someone's intention for 2026: "${intentionText}". They were asked these questions: ${questionsAsked.join(", ")}. Provide a clean transcription of what was said.`,
+            text: `Transcribe this audio conversation. The first question asked was "What's your intention for 2026?" followed by: ${questionsAsked.slice(1).join(", ")}. Provide a clean transcription of what was said, capturing the speaker's answers to each question.`,
           },
         ],
       },
@@ -51,6 +52,32 @@ export async function analyzeAudio(
 
   const transcript = transcriptionResponse.text || "";
 
+  const intentionResponse = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `From this conversation transcript, extract and summarize the person's 2026 intention in ONE clear sentence. The first question asked was "What's your intention for 2026?"
+
+Transcript:
+${transcript}
+
+RULES:
+- Write exactly ONE sentence (max 20 words)
+- Start with "I want to..." or "My intention is to..."
+- Use plain text only - NO markdown, NO asterisks
+- Capture the essence of what they said they want for 2026
+- If unclear, write: "To discover what matters most"`,
+          },
+        ],
+      },
+    ],
+  });
+
+  const intentionSummary = intentionResponse.text?.trim() || "To discover what matters most";
+
   const insightsResponse = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: [
@@ -58,11 +85,11 @@ export async function analyzeAudio(
         role: "user",
         parts: [
           {
-            text: `Write a brief, uplifting summary of this person's 2026 intention.
+            text: `Write a brief, uplifting summary of this person's conversation about their 2026 goals.
 
-Intention: "${intentionText}"
+Their stated intention: "${intentionSummary}"
 
-Conversation context:
+Full conversation:
 ${transcript}
 
 RULES:
@@ -88,7 +115,7 @@ RULES:
           {
             text: `Create an artistic image prompt for a beautiful poster based on this intention and conversation:
 
-Intention: "${intentionText}"
+Intention: "${intentionSummary}"
 Key insights: ${insights}
 
 Create a prompt for generating an inspiring, abstract artistic poster that captures the emotional essence and themes. The style should be:
@@ -108,6 +135,7 @@ Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`
 
   return {
     transcript,
+    intentionSummary,
     insights,
     posterPrompt,
   };

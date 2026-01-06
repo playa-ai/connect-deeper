@@ -40,11 +40,11 @@ export default function HostGrounding() {
   }, [currentStep]);
 
   const handleContinue = () => {
-    setLocation("/capture");
+    setLocation("/handoff");
   };
 
   const handleSkip = () => {
-    setLocation("/capture");
+    setLocation("/handoff");
   };
 
   const CurrentIcon = groundingSteps[currentStep].icon;
@@ -62,7 +62,8 @@ export default function HostGrounding() {
       >
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Before you begin</p>
-          <h1 className="text-3xl font-bold text-white">Ground Yourself</h1>
+          <h1 className="text-3xl font-bold text-white">Get Present</h1>
+          <p className="text-muted-foreground">You're about to help someone explore their 2026 goals</p>
         </div>
 
         <div className="flex justify-center gap-2 mb-8">

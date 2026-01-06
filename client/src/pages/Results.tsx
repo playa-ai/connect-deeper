@@ -25,6 +25,7 @@ export default function Results() {
   const [errorMessage, setErrorMessage] = useState("");
   
   const [transcript, setTranscript] = useState("");
+  const [intentionSummary, setIntentionSummary] = useState("");
   const [insights, setInsights] = useState("");
   const [posterImageUrl, setPosterImageUrl] = useState<string | null>(null);
   
@@ -53,6 +54,7 @@ export default function Results() {
       setErrorMessage("");
       const analysis = await analyzeConnection(data.connectionId);
       setTranscript(analysis.transcript);
+      setIntentionSummary(analysis.intentionSummary);
       setInsights(analysis.insights);
       
       setProcessingState('generating');
@@ -160,7 +162,7 @@ export default function Results() {
     if (navigator.share) {
       navigator.share({
         title: 'My 2026 Connection',
-        text: `My intention for 2026: ${data.intentionText}`,
+        text: intentionSummary ? `My intention for 2026: ${intentionSummary}` : 'Check out my 2026 connection memory!',
         url: shareUrl,
       }).catch(console.error);
     } else {
@@ -235,9 +237,16 @@ export default function Results() {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md space-y-8 pb-12"
       >
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-4">
           <h1 className="text-3xl font-bold text-white" data-testid="text-results-title">Your Connection</h1>
-          <p className="text-muted-foreground">Powered by AI analysis</p>
+          {intentionSummary && (
+            <div className="bg-gradient-to-r from-primary/20 to-pink-500/20 p-4 rounded-2xl border border-primary/30">
+              <p className="text-xs text-primary uppercase tracking-wider font-semibold mb-2">Their 2026 Intention</p>
+              <p className="text-xl font-medium text-white italic" data-testid="text-intention-summary">
+                "{intentionSummary}"
+              </p>
+            </div>
+          )}
         </div>
 
         {posterImageUrl ? (

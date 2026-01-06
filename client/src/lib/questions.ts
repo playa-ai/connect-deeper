@@ -1,5 +1,7 @@
 export type VibeLevel = 'fun' | 'meaningful';
 
+export const INTENTION_QUESTION = "What's your intention for 2026?";
+
 export const QUESTIONS: Record<VibeLevel, string[]> = {
   fun: [
     "What do you need more of in 2026?",
@@ -19,5 +21,5 @@ export const getVibeLevel = (depth: number): VibeLevel => {
 };
 
 export const getQuestions = (vibeDepth: number): string[] => {
-  return QUESTIONS[getVibeLevel(vibeDepth)];
+  return [INTENTION_QUESTION, ...QUESTIONS[getVibeLevel(vibeDepth)]];
 };

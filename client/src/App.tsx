@@ -3,7 +3,7 @@ import { ConnectionProvider } from "@/context/ConnectionContext";
 import { Toaster } from "@/components/ui/toaster";
 import Home from "@/pages/Home";
 import HostGrounding from "@/pages/HostGrounding";
-import IntentionCapture from "@/pages/IntentionCapture";
+import Handoff from "@/pages/Handoff";
 import GuestGrounding from "@/pages/GuestGrounding";
 import ConsentVibe from "@/pages/ConsentVibe";
 import Recording from "@/pages/Recording";
@@ -16,7 +16,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/ground" component={HostGrounding} />
-      <Route path="/capture" component={IntentionCapture} />
+      <Route path="/handoff" component={Handoff} />
       <Route path="/guest-ground" component={GuestGrounding} />
       <Route path="/consent" component={ConsentVibe} />
       <Route path="/recording" component={Recording} />

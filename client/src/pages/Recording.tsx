@@ -6,7 +6,7 @@ import { useWakeLock } from "@/hooks/useWakeLock";
 import { Button } from "@/components/ui/button";
 import { getQuestions } from "@/lib/questions";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, Check, Mic, AlertCircle } from "lucide-react";
+import { ArrowRight, Check, Mic, AlertCircle, Smartphone } from "lucide-react";
 import { updateConnection } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
@@ -168,8 +168,14 @@ export default function Recording() {
               <h2 className="text-3xl md:text-4xl font-bold leading-tight text-white" data-testid="text-question">
                 {questions[currentQuestionIndex]}
               </h2>
+              {currentQuestionIndex === 0 && (
+                <div className="flex items-center justify-center gap-2 text-amber-400 bg-amber-400/10 px-4 py-2 rounded-full">
+                  <Smartphone className="w-4 h-4" />
+                  <span className="text-sm font-medium">Hold mic toward their face</span>
+                </div>
+              )}
               <p className="text-lg text-white/50 italic font-light">
-                Ask, listen, then tap Next
+                Read the question, let them answer, then tap Next
               </p>
             </motion.div>
           </AnimatePresence>

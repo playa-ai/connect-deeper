@@ -6,45 +6,39 @@ import { Slider } from "@/components/ui/slider";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mic, Loader2, Sparkles, Heart } from "lucide-react";
 import { getVibeLevel } from "@/lib/questions";
-import { updateConnection } from "@/lib/api";
+import { createConnection } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 export default function ConsentVibe() {
   const [, setLocation] = useLocation();
-  const { updateData, data } = useConnection();
+  const { updateData } = useConnection();
   const [vibe, setVibe] = useState(50);
   const [isSaving, setIsSaving] = useState(false);
 
   const vibeLevel = getVibeLevel(vibe);
   
   const handleConnect = async () => {
-    if (!data.connectionId) {
-      toast({
-        title: "Error",
-        description: "No connection found. Please start over.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setIsSaving(true);
     try {
-      await updateConnection(data.connectionId, {
+      const connection = await createConnection({
+        hostId: "host-" + Date.now(),
+        intentionText: "",
         vibeDepth: vibe,
         guestConsented: true,
       });
 
       updateData({
+        connectionId: connection.id,
         vibeDepth: vibe,
         guestConsented: true,
       });
       
       setLocation("/recording");
     } catch (error) {
-      console.error("Error updating consent:", error);
+      console.error("Error creating connection:", error);
       toast({
         title: "Error",
-        description: "Failed to save your choice. Please try again.",
+        description: "Failed to start recording. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -69,9 +63,9 @@ export default function ConsentVibe() {
         className="w-full space-y-10"
       >
         <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-white">Ready to go deeper?</h1>
+          <h1 className="text-4xl font-bold text-white">Let's begin</h1>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            We'll record a 3-minute conversation. Your words stay private unless you choose to share them.
+            You'll answer a few questions about your 2026 intentions. Your words stay private unless you choose to share them.
           </p>
         </div>
 
