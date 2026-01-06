@@ -20,8 +20,9 @@ export const connections = pgTable("connections", {
   locationLat: doublePrecision("location_lat"),
   locationLng: doublePrecision("location_lng"),
   
-  // Vibe
-  vibeDepth: integer("vibe_depth").notNull(),
+  // Vibe (2D picker: -100 to 100 for each axis)
+  vibeDepth: integer("vibe_depth").notNull(), // Light (-100) to Deep (+100)
+  vibeHeart: integer("vibe_heart").notNull().default(0), // Head (-100) to Heart (+100)
   
   // Consent
   guestConsented: boolean("guest_consented").notNull().default(false),

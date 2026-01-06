@@ -5,6 +5,7 @@ interface ConnectionData {
   intentionText: string;
   guestEmail: string;
   vibeDepth: number;
+  vibeHeart: number;
   guestConsented: boolean;
   audioBlob: Blob | null;
   audioDuration: number;
@@ -23,7 +24,8 @@ const defaultData: ConnectionData = {
   connectionId: null,
   intentionText: '',
   guestEmail: '',
-  vibeDepth: 50,
+  vibeDepth: 0,
+  vibeHeart: 0,
   guestConsented: false,
   audioBlob: null,
   audioDuration: 0,

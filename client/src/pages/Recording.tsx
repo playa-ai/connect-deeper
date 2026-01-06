@@ -20,7 +20,7 @@ export default function Recording() {
   const [micError, setMicError] = useState<string | null>(null);
   const [recordingStarted, setRecordingStarted] = useState(false);
 
-  const questions = getQuestions(data.vibeDepth);
+  const questions = getQuestions(data.vibeDepth, data.vibeHeart);
 
   useEffect(() => {
     const initRecording = async () => {
