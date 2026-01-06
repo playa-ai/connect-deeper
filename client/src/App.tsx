@@ -21,6 +21,7 @@ function Router() {
       <Route path="/consent" component={ConsentVibe} />
       <Route path="/recording" component={Recording} />
       <Route path="/results" component={Results} />
+      <Route path="/results/:id" component={Results} />
       <Route path="/connection/:id" component={SharedResults} />
       <Route component={NotFound} />
     </Switch>

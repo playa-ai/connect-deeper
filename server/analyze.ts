@@ -85,19 +85,25 @@ RULES:
         role: "user",
         parts: [
           {
-            text: `Write a brief, uplifting summary of this person's conversation about their 2026 goals.
+            text: `Analyze this person's conversation about their 2026 goals and provide structured insights.
 
 Their stated intention: "${intentionSummary}"
 
 Full conversation:
 ${transcript}
 
+Provide insights in this exact format:
+**[Compelling 3-5 word headline]**
+
+• [Key insight about their core motivation - one sentence]
+• [What makes their intention meaningful - one sentence]
+• [Encouragement or path forward - one sentence]
+
 RULES:
-- Write ONLY 2-3 short sentences (max 50 words total)
-- Use plain text only - NO markdown, NO asterisks, NO bold formatting
-- Be warm and encouraging
-- Focus on their core motivation and vision
-- Start directly with the insight, no intro phrases`,
+- Use markdown: bold headline with **, bullets with •
+- Each bullet is ONE concise sentence
+- Be warm, specific, and encouraging
+- Focus on what makes THEIR intention unique`,
           },
         ],
       },
@@ -105,6 +111,44 @@ RULES:
   });
 
   const insights = insightsResponse.text || "";
+
+  // Analyze the emotional vibe of the conversation for poster colors
+  const vibeResponse = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Analyze the emotional vibe of this conversation and intention.
+
+Intention: "${intentionSummary}"
+Conversation: ${transcript}
+
+Respond with ONLY ONE of these vibes (just the word, nothing else):
+- playful (fun, light, adventurous, creative)
+- bold (ambitious, driven, powerful, determined)
+- serene (peaceful, grounded, mindful, reflective)
+- passionate (loving, connected, heartfelt, caring)
+- curious (exploratory, learning, growing, discovering)`,
+          },
+        ],
+      },
+    ],
+  });
+
+  const vibe = vibeResponse.text?.toLowerCase().trim() || "serene";
+  
+  // Map vibes to color palettes
+  const colorPalettes: Record<string, string> = {
+    playful: "Vibrant citrus palette: bright orange, sunny yellow, coral pink, with energetic and joyful splashes",
+    bold: "Power palette: deep crimson, gold, black and electric blue, with dynamic dramatic contrasts",
+    serene: "Calm palette: soft lavender, sage green, misty blue, cream, with gentle gradients and peaceful flow",
+    passionate: "Warm heart palette: rich burgundy, rose gold, soft blush, warm amber, with intimate flowing textures",
+    curious: "Discovery palette: teal, golden amber, cosmic purple, starlight white, with exploratory celestial elements",
+  };
+  
+  const colorPalette = colorPalettes[vibe] || colorPalettes.serene;
 
   const posterResponse = await ai.models.generateContent({
     model: "gemini-2.5-flash",
@@ -117,12 +161,13 @@ RULES:
 
 Intention: "${intentionSummary}"
 Key insights: ${insights}
+Emotional vibe: ${vibe}
 
 Create a prompt for generating an inspiring, abstract artistic poster that captures the emotional essence and themes. The style should be:
 - Modern and elegant
-- Deep purple and coral color palette
-- Abstract or metaphorical imagery
-- Inspirational and uplifting mood
+- ${colorPalette}
+- Abstract or metaphorical imagery matching the ${vibe} mood
+- Inspirational and visually striking
 
 Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`,
           },

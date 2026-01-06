@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Loader2, Home, Share2 } from "lucide-react";
+import { Loader2, Home, Share2, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { getConnection } from "@/lib/api";
 import type { Connection } from "@shared/schema";
+import ReactMarkdown from "react-markdown";
 
 export default function SharedResults() {
   const [, setLocation] = useLocation();
@@ -50,6 +51,15 @@ export default function SharedResults() {
     } else {
       navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link copied to clipboard!" });
+    }
+  };
+
+  const handleDownload = () => {
+    if (connection?.posterImageUrl) {
+      const link = document.createElement('a');
+      link.href = connection.posterImageUrl;
+      link.download = 'connection-poster.png';
+      link.click();
     }
   };
 
@@ -112,7 +122,9 @@ export default function SharedResults() {
         {connection.aiInsights && (
           <div className="space-y-3">
             <h2 className="text-lg font-semibold text-white">Insights</h2>
-            <p className="text-muted-foreground leading-relaxed" data-testid="text-shared-insights">{connection.aiInsights}</p>
+            <div className="text-muted-foreground leading-relaxed prose prose-invert prose-sm max-w-none" data-testid="text-shared-insights">
+              <ReactMarkdown>{connection.aiInsights}</ReactMarkdown>
+            </div>
           </div>
         )}
 
@@ -128,22 +140,34 @@ export default function SharedResults() {
           </div>
         )}
 
-        <div className="flex gap-3 pt-4">
-          <Button 
-            variant="outline" 
-            onClick={handleShare}
-            className="flex-1 h-12 border-white/10 hover:bg-white/5"
-            data-testid="button-share"
-          >
-            <Share2 className="mr-2 w-4 h-4" /> Share
-          </Button>
-          <Button 
-            onClick={() => setLocation("/")}
-            className="flex-1 h-12 bg-white text-black hover:bg-white/90"
-            data-testid="button-start-own"
-          >
-            <Home className="mr-2 w-4 h-4" /> Start Your Own
-          </Button>
+        <div className="space-y-3 pt-4">
+          {connection.posterImageUrl && (
+            <Button 
+              variant="outline" 
+              onClick={handleDownload}
+              className="w-full h-12 border-white/10 hover:bg-white/5"
+              data-testid="button-download-poster"
+            >
+              <Download className="mr-2 w-4 h-4" /> Download Poster to Print
+            </Button>
+          )}
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={handleShare}
+              className="flex-1 h-12 border-white/10 hover:bg-white/5"
+              data-testid="button-share"
+            >
+              <Share2 className="mr-2 w-4 h-4" /> Share
+            </Button>
+            <Button 
+              onClick={() => setLocation("/")}
+              className="flex-1 h-12 bg-white text-black hover:bg-white/90"
+              data-testid="button-start-own"
+            >
+              <Home className="mr-2 w-4 h-4" /> Start Your Own
+            </Button>
+          </div>
         </div>
       </motion.div>
     </div>

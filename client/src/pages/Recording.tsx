@@ -81,7 +81,7 @@ export default function Recording() {
         });
         
         releaseWakeLock();
-        setLocation("/results");
+        setLocation(`/results/${data.connectionId}`);
       };
     } catch (error) {
       console.error("Error saving recording:", error);

@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { useConnection } from "@/context/ConnectionContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { Share2, Download, Sparkles, Loader2, ArrowRight, MessageCircle, Compass, Zap, ChevronDown, ChevronUp } from "lucide-react";
+import { Share2, Download, Sparkles, Loader2, ArrowRight, MessageCircle, Compass, Zap, ChevronDown, ChevronUp, Smartphone } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { toast } from "@/hooks/use-toast";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -20,8 +21,13 @@ const emailSchema = z.object({
 
 export default function Results() {
   const [, setLocation] = useLocation();
+  const [match, params] = useRoute("/results/:id");
   const { data, updateData, reset } = useConnection();
-  const [processingState, setProcessingState] = useState<'analyzing' | 'generating' | 'complete' | 'error'>('analyzing');
+  
+  // Use URL param or context data
+  const connectionId = params?.id || data.connectionId;
+  const [processingState, setProcessingState] = useState<'waiting' | 'analyzing' | 'generating' | 'complete' | 'error'>('waiting');
+  const [hasTriedAnalysis, setHasTriedAnalysis] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   
   const [transcript, setTranscript] = useState("");
@@ -43,23 +49,29 @@ export default function Results() {
   });
 
   const runAnalysis = async () => {
-    if (!data.connectionId) {
-      setErrorMessage("No connection found. Please start over.");
-      setProcessingState('error');
+    if (!connectionId) {
+      // Don't error immediately - wait for context to load
       return;
+    }
+    
+    setHasTriedAnalysis(true);
+    
+    // Update URL to include connection ID for sharing
+    if (connectionId && !params?.id) {
+      window.history.replaceState(null, '', `/results/${connectionId}`);
     }
 
     try {
       setProcessingState('analyzing');
       setErrorMessage("");
-      const analysis = await analyzeConnection(data.connectionId);
+      const analysis = await analyzeConnection(connectionId);
       setTranscript(analysis.transcript);
       setIntentionSummary(analysis.intentionSummary);
       setInsights(analysis.insights);
       
       setProcessingState('generating');
       try {
-        const poster = await generatePoster(data.connectionId);
+        const poster = await generatePoster(connectionId);
         setPosterImageUrl(poster.posterImageUrl);
       } catch (posterError) {
         console.error("Poster generation failed:", posterError);
@@ -74,15 +86,31 @@ export default function Results() {
   };
 
   useEffect(() => {
-    runAnalysis();
-  }, [data.connectionId]);
+    if (connectionId && !hasTriedAnalysis) {
+      runAnalysis();
+    }
+  }, [connectionId, hasTriedAnalysis]);
+  
+  // Show error if visiting /results directly without ID and no context
+  useEffect(() => {
+    // Only error if we're on /results (no URL param) and no context after a brief wait
+    if (!params?.id && !data.connectionId && processingState === 'waiting') {
+      const timer = setTimeout(() => {
+        if (!data.connectionId) {
+          setErrorMessage("No connection found. Please start over.");
+          setProcessingState('error');
+        }
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [params?.id, data.connectionId, processingState]);
 
   useEffect(() => {
-    if (processingState === 'complete' && data.connectionId && !followUp && !loadingFollowUp) {
+    if (processingState === 'complete' && connectionId && !followUp && !loadingFollowUp) {
       const loadFollowUp = async () => {
         setLoadingFollowUp(true);
         try {
-          const followUpData = await getFollowUp(data.connectionId!);
+          const followUpData = await getFollowUp(connectionId!);
           setFollowUp(followUpData);
         } catch (followUpError) {
           console.error("Follow-up generation failed:", followUpError);
@@ -92,13 +120,13 @@ export default function Results() {
       };
       loadFollowUp();
     }
-  }, [processingState, data.connectionId, followUp, loadingFollowUp]);
+  }, [processingState, connectionId, followUp, loadingFollowUp]);
 
   const handleEmailSubmit = async (values: z.infer<typeof emailSchema>) => {
-    if (!data.connectionId) return;
+    if (!connectionId) return;
     
     try {
-      await updateConnection(data.connectionId, {
+      await updateConnection(connectionId, {
         guestEmail: values.email,
       });
       
@@ -119,11 +147,11 @@ export default function Results() {
   };
 
   const handleDone = async () => {
-    if (!data.connectionId) return;
+    if (!connectionId) return;
     
     setIsSaving(true);
     try {
-      await updateConnection(data.connectionId, {
+      await updateConnection(connectionId, {
         npsScore: nps,
         feedbackText: feedback,
       });
@@ -155,8 +183,8 @@ export default function Results() {
   };
 
   const handleShare = () => {
-    const shareUrl = data.connectionId 
-      ? `${window.location.origin}/connection/${data.connectionId}`
+    const shareUrl = connectionId 
+      ? `${window.location.origin}/connection/${connectionId}`
       : window.location.origin;
       
     if (navigator.share) {
@@ -188,7 +216,7 @@ export default function Results() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (processingState === 'analyzing' || processingState === 'generating') {
+  if (processingState === 'waiting' || processingState === 'analyzing' || processingState === 'generating') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center space-y-8 bg-background relative overflow-hidden">
         <div className="relative">
@@ -198,12 +226,14 @@ export default function Results() {
         
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-white" data-testid="text-processing-status">
-            {processingState === 'analyzing' ? 'Analyzing Conversation...' : 'Generating Your Poster...'}
+            {processingState === 'waiting' ? 'Loading...' : processingState === 'analyzing' ? 'Analyzing Conversation...' : 'Generating Your Poster...'}
           </h2>
           <p className="text-muted-foreground">
-            {processingState === 'analyzing' 
-              ? 'AI is transcribing and extracting insights' 
-              : 'Creating a visual artifact of your connection'}
+            {processingState === 'waiting' 
+              ? 'Preparing your connection'
+              : processingState === 'analyzing' 
+                ? 'AI is transcribing and extracting insights' 
+                : 'Creating a visual artifact of your connection'}
           </p>
         </div>
       </div>
@@ -291,9 +321,9 @@ export default function Results() {
         {insights && (
           <div className="space-y-4 bg-white/5 p-6 rounded-2xl border border-white/10">
             <h3 className="text-sm font-bold tracking-widest uppercase text-white/60">AI Insights</h3>
-            <p className="text-white/90 leading-relaxed whitespace-pre-wrap" data-testid="text-insights">
-              {insights}
-            </p>
+            <div className="text-white/90 leading-relaxed prose prose-invert prose-sm max-w-none" data-testid="text-insights">
+              <ReactMarkdown>{insights}</ReactMarkdown>
+            </div>
           </div>
         )}
 
@@ -376,7 +406,9 @@ export default function Results() {
                             <div className="w-5 h-5 rounded-full bg-yellow-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
                               <span className="text-yellow-400 text-xs font-bold">{i + 1}</span>
                             </div>
-                            <span className="text-yellow-200/90 text-sm">{action}</span>
+                            <div className="text-yellow-200/90 text-sm prose prose-invert prose-sm max-w-none">
+                              <ReactMarkdown>{action}</ReactMarkdown>
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -487,6 +519,19 @@ export default function Results() {
             )}
           </Button>
         </div>
+
+        {/* Handback to Host */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-center justify-center gap-3 p-4 bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-2xl border border-amber-500/20"
+        >
+          <Smartphone className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <p className="text-amber-200/90 text-sm text-center" data-testid="text-handback">
+            Please hand the phone back to your host now
+          </p>
+        </motion.div>
 
       </motion.div>
     </div>
