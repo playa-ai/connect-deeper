@@ -79,7 +79,7 @@ export default function Hook() {
           <Button 
             onClick={handleStart}
             disabled={!selectedChip}
-            className="w-full h-16 text-lg font-semibold bg-white text-black hover:bg-white/90 hover:scale-[1.02] transition-all rounded-full shadow-[0_0_30px_rgba(255,255,255,0.2)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:from-amber-500 hover:to-yellow-600 hover:scale-[1.02] transition-all rounded-full shadow-[0_0_30px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             data-testid="button-experiment"
           >
             Want to try a 60-second experiment? <ArrowRight className="ml-2 w-5 h-5" />

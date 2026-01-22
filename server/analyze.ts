@@ -163,11 +163,13 @@ Intention: "${intentionSummary}"
 Key insights: ${insights}
 Emotional vibe: ${vibe}
 
-Create a prompt for generating an inspiring, abstract artistic poster that captures the emotional essence and themes. The style should be:
-- Modern and elegant
+Create a prompt for generating a beautiful, FULL-BLEED artistic poster that captures the emotional essence and themes. The style should be:
+- Modern and elegant, ready to print directly
 - ${colorPalette}
 - Abstract or metaphorical imagery matching the ${vibe} mood
 - Inspirational and visually striking
+- FULL BLEED: The artwork fills the entire image edge-to-edge with NO borders, NO frames, NO mockups, NO white backgrounds, NO picture frame effects
+- The art itself IS the poster - just the pure artwork, nothing around it
 
 Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`,
           },

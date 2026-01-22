@@ -203,10 +203,10 @@ export default function Results() {
         
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-white" data-testid="text-processing-status">
-            {processingState === 'waiting' ? 'Loading...' : 'Listening to your story...'}
+            {processingState === 'waiting' ? 'Loading...' : 'Preparing your results...'}
           </h2>
           <p className="text-muted-foreground">
-            {processingState === 'analyzing' ? 'This takes about 30 seconds' : 'Preparing your connection'}
+            {processingState === 'analyzing' ? 'Just a moment' : 'Getting things ready'}
           </p>
         </div>
       </div>
