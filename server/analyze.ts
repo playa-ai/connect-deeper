@@ -164,12 +164,15 @@ Key insights: ${insights}
 Emotional vibe: ${vibe}
 
 Create a prompt for generating a beautiful, FULL-BLEED artistic poster that captures the emotional essence and themes. The style should be:
+- ASPECT RATIO: 9:16 PORTRAIT orientation (tall, vertical like a phone wallpaper or poster)
 - Modern and elegant, ready to print directly
 - ${colorPalette}
 - Abstract or metaphorical imagery matching the ${vibe} mood
 - Inspirational and visually striking
 - FULL BLEED: The artwork fills the entire image edge-to-edge with NO borders, NO frames, NO mockups, NO white backgrounds, NO picture frame effects
 - The art itself IS the poster - just the pure artwork, nothing around it
+
+IMPORTANT: Begin your prompt with "9:16 portrait aspect ratio, " to ensure correct dimensions.
 
 Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`,
           },

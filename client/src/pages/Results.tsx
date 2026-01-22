@@ -111,9 +111,9 @@ export default function Results() {
     }
   }, [params?.id, data.connectionId, processingState]);
 
-  // Rotate loading messages while analyzing
+  // Rotate loading messages while waiting or analyzing
   useEffect(() => {
-    if (processingState === 'analyzing') {
+    if (processingState === 'waiting' || processingState === 'analyzing') {
       const interval = setInterval(() => {
         setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
       }, 2500);
@@ -235,10 +235,10 @@ export default function Results() {
             className="text-2xl font-bold text-white" 
             data-testid="text-processing-status"
           >
-            {processingState === 'waiting' ? 'Loading...' : LOADING_MESSAGES[loadingMessageIndex]}
+            {LOADING_MESSAGES[loadingMessageIndex]}
           </motion.h2>
           <p className="text-muted-foreground">
-            {processingState === 'analyzing' ? 'This is the fun part' : 'Getting things ready'}
+            This is the fun part
           </p>
         </div>
       </div>
@@ -305,7 +305,7 @@ export default function Results() {
         {insights && (
           <div className="bg-gradient-to-br from-primary/10 to-purple-500/5 p-5 rounded-2xl border border-primary/20">
             <p className="text-white/90 leading-relaxed text-center" data-testid="text-insights">
-              {insights.split('\n')[0].replace(/^[#*\-\s]+/, '')}
+              {insights.split('\n')[0].replace(/^[#*\-\s]+/, '').replace(/\*+$/, '')}
             </p>
           </div>
         )}
@@ -347,14 +347,15 @@ export default function Results() {
         {/* Poster (async loaded) */}
         {(posterLoading || posterImageUrl) && (
           <div className="space-y-3">
+            <p className="text-xs text-muted-foreground text-center">9:16 print-ready format</p>
             {posterLoading ? (
-              <div className="w-full aspect-[4/5] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+              <div className="w-full aspect-[9/16] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
                 <p className="text-sm text-muted-foreground">Creating your poster...</p>
               </div>
             ) : posterImageUrl && (
               <>
-                <div className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl">
                   <img 
                     src={posterImageUrl} 
                     alt="Your connection poster" 
