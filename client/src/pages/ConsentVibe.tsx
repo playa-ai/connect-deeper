@@ -67,10 +67,19 @@ export default function ConsentVibe() {
         transition={{ duration: 0.5 }}
         className="w-full space-y-8"
       >
+        <a 
+          href="https://playa-ai.org" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center text-xs text-muted-foreground hover:text-white transition-colors mb-4"
+        >
+          A connection experiment by <span className="ml-1 underline">Playa AI</span>
+        </a>
+
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold text-white">Choose your vibe</h1>
           <p className="text-base text-muted-foreground leading-relaxed">
-            Tap anywhere on the grid to set the conversation tone. Your words stay private unless you share them.
+            Tap anywhere on the grid to set the conversation tone.
           </p>
         </div>
 
@@ -100,6 +109,10 @@ export default function ConsentVibe() {
             )}
           </Button>
           
+          <p className="text-xs text-muted-foreground">
+            Private by default. Nothing shared without permission.
+          </p>
+
           <Button 
             variant="ghost" 
             onClick={handleDecline}
