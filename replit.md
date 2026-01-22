@@ -1,12 +1,12 @@
-# Connection - NYE Intention App
+# Playa AI - Connection Experiment
 
 ## Overview
 
-A mobile-first web application called "Connection" that facilitates meaningful in-person conversations at events. The app captures participants' 2026 intentions, records short conversation audio, and collects feedback through an NPS score. It's designed for hosts at events (like NYE parties) to approach guests, have verbal conversations about intentions, then use the app to capture and deepen connections through recorded questions.
+A mobile-first web application branded as "A connection experiment by Playa AI" (playa-ai.org) that facilitates meaningful conversations exploring 2026 intentions. The app features a streamlined onboarding with a hook question, a 2D vibe picker for conversation tone, recorded audio Q&A, and AI-generated insights.
 
-The core user flow is: Home → Host Grounding → Handoff (explain to guest) → Guest Grounding → Consent + Vibe Selection → Audio Recording (4 Questions including intention) → Results + NPS Feedback.
+The core user flow is: Hook (intention chip selection) → Explain (what you'll do) → 2D Vibe Picker → Audio Recording (4 Questions) → Results + NPS Feedback.
 
-The host (person with phone) asks questions, the guest answers. The first question captures their 2026 intention, which is then transcribed and highlighted in the results.
+Privacy-first messaging throughout: "Private by default. Nothing shared without permission."
 
 ## User Preferences
 
@@ -42,14 +42,12 @@ Preferred communication style: Simple, everyday language.
 - **PWA Support**: Service worker, manifest.json, and offline caching
 
 ### Application Flow
-1. Home page - explains host/guest roles
-2. Host Grounding - 3-step presence exercise for the host
-3. Handoff - instructions for host to explain the app and hand phone to guest
-4. Guest Grounding - 3-step presence exercise for guest with value prop (what they'll get)
-5. Consent + Vibe - guest selects fun/meaningful, creates connection in DB
-6. Recording - 4 questions (intention first, then 3 vibe-based), with mic positioning tip
-7. Results - AI extracts intention from transcript, generates insights, poster, and follow-up suggestions
-8. NPS feedback and shareable link
+1. Hook page (/) - "What's your intention for 2026?" with quick-tap chips (Growth, Love, Health, Career, Adventure, Peace) + "60-second experiment" CTA
+2. Explain (/explain) - "Here's what you're about to do" with 3 steps: pick vibe, answer prompts, get insight
+3. Consent + Vibe (/consent) - 2D vibe picker with 4 quadrants: Playful & Warm, Deep & Intimate, Playful & Curious, Deep & Philosophical
+4. Recording (/recording) - 4 questions (intention first, then 3 vibe-based), with mic positioning tip
+5. Results (/results) - AI extracts intention from transcript, generates insights, poster, and follow-up suggestions
+6. Shareable link (/connection/:id) - Public results page with NPS feedback
 
 ## External Dependencies
 
