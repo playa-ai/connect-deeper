@@ -17,6 +17,19 @@ const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
 });
 
+const LOADING_MESSAGES = [
+  "Consulting the cosmos...",
+  "Summoning your future self...",
+  "Manifesting insights...",
+  "Downloading 2026 vibes...",
+  "Tuning into your frequency...",
+  "Asking the universe nicely...",
+  "Aligning intentions...",
+  "Extracting pure wisdom...",
+  "Reading between the vibes...",
+  "Channeling clarity...",
+];
+
 export default function Results() {
   const [, setLocation] = useLocation();
   const [match, params] = useRoute("/results/:id");
@@ -26,6 +39,7 @@ export default function Results() {
   const [processingState, setProcessingState] = useState<'waiting' | 'analyzing' | 'complete' | 'error'>('waiting');
   const [hasTriedAnalysis, setHasTriedAnalysis] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   
   const [transcript, setTranscript] = useState("");
   const [intentionSummary, setIntentionSummary] = useState("");
@@ -96,6 +110,16 @@ export default function Results() {
       return () => clearTimeout(timer);
     }
   }, [params?.id, data.connectionId, processingState]);
+
+  // Rotate loading messages while analyzing
+  useEffect(() => {
+    if (processingState === 'analyzing') {
+      const interval = setInterval(() => {
+        setLoadingMessageIndex((prev) => (prev + 1) % LOADING_MESSAGES.length);
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [processingState]);
 
   useEffect(() => {
     if (processingState === 'complete' && connectionId && !followUp && !loadingFollowUp) {
@@ -202,11 +226,19 @@ export default function Results() {
         </div>
         
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-white" data-testid="text-processing-status">
-            {processingState === 'waiting' ? 'Loading...' : 'Preparing your results...'}
-          </h2>
+          <motion.h2 
+            key={loadingMessageIndex}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.3 }}
+            className="text-2xl font-bold text-white" 
+            data-testid="text-processing-status"
+          >
+            {processingState === 'waiting' ? 'Loading...' : LOADING_MESSAGES[loadingMessageIndex]}
+          </motion.h2>
           <p className="text-muted-foreground">
-            {processingState === 'analyzing' ? 'Just a moment' : 'Getting things ready'}
+            {processingState === 'analyzing' ? 'This is the fun part' : 'Getting things ready'}
           </p>
         </div>
       </div>
