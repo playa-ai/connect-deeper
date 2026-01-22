@@ -42,7 +42,7 @@ Preferred communication style: Simple, everyday language.
 - **PWA Support**: Service worker, manifest.json, and offline caching
 
 ### Application Flow
-1. Hook page (/) - "What's your intention for 2026?" with quick-tap chips (Growth, Love, Health, Career, Adventure, Peace) + "60-second experiment" CTA
+1. Hook page (/) - "What matters most right now?" with quick-tap chips (Growth, Love, Health, Career, Adventure, Peace) + "60-second experiment" CTA
 2. Explain (/explain) - "Here's what you're about to do" with 3 steps: pick vibe, answer prompts, get insight
 3. Consent + Vibe (/consent) - 2D vibe picker with 4 quadrants: Playful & Warm, Deep & Intimate, Playful & Curious, Deep & Philosophical
 4. Recording (/recording) - 4 questions (intention first, then 3 vibe-based), with mic positioning tip
