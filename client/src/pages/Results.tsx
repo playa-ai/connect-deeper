@@ -351,55 +351,38 @@ export default function Results() {
 
         {/* Oracle Card - Back (Guidance) */}
         {(loadingFollowUp || nextQuestion || nextQuest) && (
-          <div className="relative">
-            <div className="text-center mb-4">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest">Turn the Card</p>
-            </div>
+          <div className="space-y-3">
+            <p className="text-xs text-muted-foreground text-center uppercase tracking-widest">Turn the Card</p>
             
-            <div className="bg-gradient-to-br from-purple-900/30 via-indigo-900/20 to-pink-900/20 rounded-2xl border border-white/10 p-6 space-y-5 backdrop-blur-sm">
-              <div className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden pointer-events-none">
-                <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent opacity-50" />
-              </div>
-              
+            <div className="aspect-[3/4] w-full bg-gradient-to-b from-indigo-950/80 to-purple-950/60 rounded-2xl border border-white/10 p-6 flex flex-col justify-center">
               {loadingFollowUp ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-5 h-5 animate-spin text-primary mr-2" />
-                  <span className="text-sm text-muted-foreground italic">Receiving guidance...</span>
+                <div className="flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-white/50" />
                 </div>
               ) : (
-                <>
+                <div className="space-y-6 text-center">
                   {nextQuestion && (
-                    <div className="text-center space-y-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <MessageCircle className="w-4 h-4 text-pink-400" />
-                        <span className="text-xs font-semibold text-pink-400 uppercase tracking-[0.2em]">Ask Yourself</span>
-                      </div>
-                      <p className="text-lg text-white/90 italic font-light leading-relaxed" data-testid="text-next-question">
+                    <div className="space-y-2">
+                      <p className="text-xs text-white/50 uppercase tracking-wider">Ask Yourself</p>
+                      <p className="text-white/90 italic leading-relaxed" data-testid="text-next-question">
                         "{nextQuestion}"
                       </p>
                     </div>
                   )}
                   
                   {nextQuestion && nextQuest && (
-                    <div className="flex items-center justify-center gap-4">
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                      <Sparkles className="w-3 h-3 text-white/30" />
-                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    </div>
+                    <div className="w-12 h-px bg-white/20 mx-auto" />
                   )}
                   
                   {nextQuest && (
-                    <div className="text-center space-y-3">
-                      <div className="flex items-center justify-center gap-2">
-                        <Zap className="w-4 h-4 text-amber-400" />
-                        <span className="text-xs font-semibold text-amber-400 uppercase tracking-[0.2em]">Your Quest</span>
-                      </div>
-                      <p className="text-base text-white/90 font-medium leading-relaxed" data-testid="text-next-quest">
+                    <div className="space-y-2">
+                      <p className="text-xs text-white/50 uppercase tracking-wider">Your Quest</p>
+                      <p className="text-white/90 leading-relaxed" data-testid="text-next-quest">
                         {nextQuest}
                       </p>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           </div>

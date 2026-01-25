@@ -229,25 +229,24 @@ Return ONLY the two lines, nothing else.`,
           {
             text: `Create an artistic image prompt for a mystical ORACLE CARD poster based on this intention:
 
-Key word to feature: "${oracleKeyword}" (must appear artistically integrated into the design, repeated in different sizes/opacities)
+Key word: "${oracleKeyword}"
 Headline: "${oracleHeadline}"
 Tagline: "${oracleTagline}"
 Intention: "${intentionSummary}"
 Emotional vibe: ${vibe}
 
-Create a prompt for an ORACLE CARD style poster with these requirements:
-- ASPECT RATIO: 9:16 PORTRAIT orientation (tall, vertical oracle card)
-- The word "${oracleKeyword}" should appear ARTISTICALLY INTEGRATED into the imagery - repeated in different sizes, layered, flowing through the design
-- At the BOTTOM: bold headline "${oracleHeadline}" with smaller tagline "${oracleTagline}" below it
+Create a prompt for an ORACLE CARD style poster:
+- ASPECT RATIO: 9:16 PORTRAIT (tall, vertical)
+- Feature the word "${oracleKeyword}" once, elegantly placed in the upper portion of the card
+- At the BOTTOM: headline "${oracleHeadline}" with tagline "${oracleTagline}" below
 - ${colorPalette}
-- Mystical, cosmic, spiritual art style - like a beautiful oracle/tarot card
-- Abstract flowing imagery: energy bursts, cosmic swirls, flowing ribbons, crystal shards, sacred geometry
-- FULL BLEED: artwork fills edge-to-edge, no borders or frames
-- Typography is elegant, mystical, integrated into the art
+- Mystical oracle card art style with abstract flowing imagery
+- FULL BLEED: artwork fills edge-to-edge, no borders
+- Clean, elegant typography
 
-IMPORTANT: Begin prompt with "9:16 portrait oracle card, typography integrated, "
+IMPORTANT: Begin with "9:16 portrait oracle card, "
 
-Return ONLY the image generation prompt. Keep under 120 words.`,
+Return ONLY the prompt. Keep under 80 words.`,
           },
         ],
       },
