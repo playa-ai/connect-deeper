@@ -128,15 +128,36 @@ export default function SharedResults() {
           </div>
         )}
 
-        {connection.posterImageUrl && (
-          <div className="space-y-3">
-            <h2 className="text-lg font-semibold text-white">Memory Poster</h2>
-            <img 
-              src={connection.posterImageUrl} 
-              alt="Connection poster" 
-              className="w-full rounded-2xl shadow-xl"
-              data-testid="img-shared-poster"
-            />
+        {(connection.posterImageUrl || connection.oracleKeyword) && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-widest">Your Oracle Card</p>
+            </div>
+            
+            {connection.oracleKeyword && !connection.posterImageUrl && (
+              <div className="text-center space-y-2 py-4">
+                <p className="text-4xl font-bold text-primary tracking-wider" data-testid="text-oracle-keyword">
+                  {connection.oracleKeyword}
+                </p>
+                {connection.oracleHeadline && (
+                  <p className="text-lg font-semibold text-white/90 uppercase tracking-wide">{connection.oracleHeadline}</p>
+                )}
+                {connection.oracleTagline && (
+                  <p className="text-sm text-muted-foreground italic">{connection.oracleTagline}</p>
+                )}
+              </div>
+            )}
+            
+            {connection.posterImageUrl && (
+              <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
+                <img 
+                  src={connection.posterImageUrl} 
+                  alt="Your oracle card" 
+                  className="w-full h-full object-cover"
+                  data-testid="img-shared-poster"
+                />
+              </div>
+            )}
           </div>
         )}
 

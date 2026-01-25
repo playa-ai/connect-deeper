@@ -2,11 +2,11 @@
 
 ## Overview
 
-A mobile-first web application branded as "A connection experiment by Playa AI" (playa-ai.org) that facilitates meaningful conversations exploring 2026 intentions. The app features a streamlined onboarding with a hook question, a 2D vibe picker for conversation tone, recorded audio Q&A, and AI-generated insights.
+A mobile-first web application branded as "A connection experiment by Playa AI" (playa-ai.org) that facilitates meaningful conversations exploring personal intentions. The app features a streamlined onboarding with a hook question, a 2D vibe picker for conversation tone, recorded audio Q&A, and AI-generated oracle card insights.
 
-The core user flow is: Hook (intention chip selection) → Explain (what you'll do) → 2D Vibe Picker → Audio Recording (4 Questions) → Results + NPS Feedback.
+The core user flow is: Hook (intention chip selection) → Explain → Vibe Picker → Eye Contact (presence moment) → Audio Recording (4 Questions) → Oracle Card Results + NPS Feedback.
 
-Privacy-first messaging throughout: "Private by default. Nothing shared without permission."
+Privacy-first messaging throughout with link to playa-ai.org/privacy before users start the flow.
 
 ## User Preferences
 
@@ -42,12 +42,13 @@ Preferred communication style: Simple, everyday language.
 - **PWA Support**: Service worker, manifest.json, and offline caching
 
 ### Application Flow
-1. Hook page (/) - "What matters most right now?" with quick-tap chips (Growth, Love, Health, Career, Adventure, Peace) + "60-second experiment" CTA
-2. Explain (/explain) - "Here's what you're about to do" with 3 steps: pick vibe, answer prompts, get insight
-3. Consent + Vibe (/consent) - 2D vibe picker with 4 quadrants: Playful & Warm, Deep & Intimate, Playful & Curious, Deep & Philosophical
-4. Recording (/recording) - 4 questions (intention first, then 3 vibe-based), with mic positioning tip
-5. Results (/results) - AI extracts intention from transcript, generates insights, poster, and follow-up suggestions
-6. Shareable link (/connection/:id) - Public results page with NPS feedback
+1. Hook page (/) - "What matters most right now?" with quick-tap chips (Growth, Love, Health, Career, Adventure, Peace) + "Let's go deeper" CTA
+2. Explain (/explain) - "Here's what you're about to do" with 3 steps: pick vibe, answer prompts, get insight + privacy policy link
+3. Consent + Vibe (/consent) - 2D vibe picker with 4 quadrants and "Balance" center state + privacy policy link
+4. Eye Contact (/presence) - "Put the phone down and look into each other's eyes" interstitial
+5. Recording (/recording) - 4 questions (intention first, then 3 vibe-based), with mic positioning tip
+6. Results (/results) - Oracle card experience with keyword, headline, tagline, AI poster, and "Turn the Card" follow-up section
+7. Shareable link (/connection/:id) - Public oracle card results page with NPS feedback
 
 ## External Dependencies
 
@@ -62,10 +63,13 @@ Preferred communication style: Simple, everyday language.
 
 ### AI Features (Gemini)
 - **Transcription**: Converts recorded audio to text
-- **Intention Extraction**: Summarizes guest's 2026 intention from first answer
+- **Intention Extraction**: Summarizes guest's intention from first answer
 - **Insights**: Generates encouraging summary of conversation
-- **Poster**: Creates AI-generated memory poster
-- **Follow-up Suggestions**: Generates deeper questions, topics to explore, and action items
+- **Oracle Card Generation**: 
+  - Extracts key evocative word (BLOOM, FLOW, IGNITE, etc.)
+  - Generates mystical headline + tagline
+  - Creates 9:16 oracle card poster with integrated typography
+- **Follow-up Suggestions**: "Ask Yourself" question and "Your Quest" action item styled as back of oracle card
 
 ### Third-Party Services
 - None required for MVP - self-contained application
