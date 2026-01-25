@@ -1,0 +1,138 @@
+Connection App – Transcript & Requirements
+
+Source: Meeting transcript (Jan 24, 2026) with Alex Azzi + Raed Marji.
+
+This document contains:
+	1.	Key transcript extracts (what was said)
+	2.	Structured requirements (what to build / improve)
+
+⸻
+
+1) Key Transcript Extracts (Highlights)
+
+Flow / Copy
+	•	“Not now” breaks the flow → rename CTA (e.g., “Start a 60-second experiment”, “Let’s connect deeper”).
+	•	Remove “2026” from the UI copy.
+
+Privacy
+	•	Replace generic “Private by default…” with a dedicated Privacy section.
+	•	Add a clear link to the privacy policy (Burner-values inspired).
+
+Tone Grid
+	•	Make Balance the visual default when centered.
+	•	Increase Balance label prominence.
+	•	Add clearer instruction: “Set the conversation tone by tapping anywhere on the grid.”
+
+Eye Contact / Presence
+	•	Add a reminder right after starting: put the phone down and look into each other’s eyes.
+
+Question Mechanics
+	•	Original idea: both people answer the same question.
+	•	Concern: repeating answers feels awkward / unnatural.
+	•	Alternative: pre-configured answers may be shared later (e.g., via email) without biasing the other person.
+
+Capture & Memory
+	•	Email capture should be prominent and early (“don’t make me think”).
+	•	Desire: profile/history view of answers.
+	•	Capture partner name (optional) to keep context.
+
+Personalization & Ownership
+	•	Users should be able to create their own flows:
+	•	choose categorized sample questions
+	•	type their own questions
+	•	describe intention → generate suggested questions → pick 3 of 5
+	•	customize colors
+	•	share a link
+
+Voice-First + Music
+	•	Move toward a voice-first experience: app speaks questions + transcribes answers.
+	•	Add simple toggles: Voice On/Off, Music On/Off.
+
+Mini CRM / Connections
+	•	After delivering value, capture contact details:
+	•	photo (business card / phone number OCR)
+	•	or speak contact details
+	•	Store answers + contact + event context; enable query/search later.
+
+⸻
+
+2) Structured Requirements (Prioritized)
+
+P0 – Must Ship Next
+
+R1. Fix Broken Flow + Copy
+	•	Replace “Not now” with a more natural CTA.
+	•	Remove “2026” from UI text.
+	•	Fix any glitch impacting progression.
+
+Acceptance: No dated copy remains; flow completes without confusing states.
+
+R2. Privacy Section + Link
+	•	Dedicated privacy section + link to policy.
+	•	Clear promise: “Nothing shared without permission.”
+
+Acceptance: Privacy link visible before starting; language is explicit.
+
+R3. Tone Grid: Balance as Default
+	•	When centered, highlight “Balance” and make it larger.
+	•	Improve instruction text for first-time users.
+
+Acceptance: New users understand the grid without explanation.
+
+R4. In-Flow Eye Contact Reminder
+	•	One short interstitial: “Put the phone down and look into each other’s eyes.”
+
+Acceptance: Shows once per session; one-tap continue.
+
+R5. Email Capture Placement
+	•	Prominent “Email this to yourself” early.
+
+Acceptance: Appears within first 1–2 screens; no scrolling required.
+
+⸻
+
+P1 – Strong Next Iteration
+
+R6. Question Mechanics Modes
+	•	Default mode that avoids “interrogation vs confession”.
+	•	Optional toggle for “both answer” (if kept).
+	•	If both-answer: add voice isolation/diarization.
+
+R7. Profile / History
+	•	Sessions list: timestamp, tone, answers, optional partner name.
+
+R8. Flow Builder
+	•	Create flows via custom questions, categorized templates, or intent → AI suggestions.
+	•	Pick 3 of 5 suggested questions.
+	•	Basic theme customization.
+	•	Shareable link.
+
+⸻
+
+P2 – Differentiators
+
+R9. Voice-First Mode
+	•	TTS asks questions; STT captures answers.
+
+R10. Ambient Music Toggle
+	•	Music on/off; ensure it doesn’t interfere with speech capture.
+
+R11. Connections CRM
+	•	Capture contact details after the interaction.
+	•	Store by event; searchable later.
+
+⸻
+
+3) Minimal Data Model (Guidance)
+	•	User
+	•	Flow (questions + theme)
+	•	Session (flow_id, timestamp, tone, answers, optional partner_name, optional event)
+	•	Connection (optional contact info linked to session/event)
+
+⸻
+
+4) Open Questions
+	•	Should reciprocity mode be default vs both-answer?
+	•	When do we introduce login?
+	•	What’s the MVP for the CRM + search?
+	•	Audio retention policy: raw audio vs transcript only?
