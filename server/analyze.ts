@@ -13,6 +13,9 @@ export interface AnalysisResult {
   intentionSummary: string;
   insights: string;
   posterPrompt: string;
+  oracleKeyword: string;
+  oracleHeadline: string;
+  oracleTagline: string;
 }
 
 export async function analyzeAudio(
@@ -139,7 +142,7 @@ Respond with ONLY ONE of these vibes (just the word, nothing else):
 
   const vibe = vibeResponse.text?.toLowerCase().trim() || "serene";
   
-  // Map vibes to color palettes
+  // Map vibes to color palettes for oracle cards
   const colorPalettes: Record<string, string> = {
     playful: "Vibrant citrus palette: bright orange, sunny yellow, coral pink, with energetic and joyful splashes",
     bold: "Power palette: deep crimson, gold, black and electric blue, with dynamic dramatic contrasts",
@@ -150,6 +153,73 @@ Respond with ONLY ONE of these vibes (just the word, nothing else):
   
   const colorPalette = colorPalettes[vibe] || colorPalettes.serene;
 
+  // Extract a key evocative word from the conversation for the oracle card
+  const keywordResponse = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Extract ONE powerful, evocative word from this conversation that captures its essence. This word will be featured prominently on an oracle card.
+
+Intention: "${intentionSummary}"
+Conversation: ${transcript}
+
+RULES:
+- Choose ONE single word (not a phrase)
+- The word should be evocative, emotional, or action-oriented
+- Examples: BLOOM, FLOW, IGNITE, TRUST, CREATE, RADIATE, SOAR, BREATHE, SHINE, EVOLVE
+- Make it feel like an oracle card keyword
+- Return ONLY the word in UPPERCASE, nothing else`,
+          },
+        ],
+      },
+    ],
+  });
+
+  const oracleKeyword = keywordResponse.text?.trim().toUpperCase() || "INTENTION";
+
+  // Generate oracle card headline and tagline
+  const headlineResponse = await ai.models.generateContent({
+    model: "gemini-2.5-flash",
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: `Create an oracle card headline and tagline based on this intention and conversation.
+
+Intention: "${intentionSummary}"
+Key word: ${oracleKeyword}
+Insights: ${insights}
+
+Provide in this exact format (two lines only):
+[2-3 WORD HEADLINE IN CAPS]
+[5-7 word tagline in lowercase]
+
+Examples:
+LIBERATED CREATION
+authentic brilliance unleashed
+
+SACRED MOMENTUM  
+where purpose meets inspired action
+
+WILD BECOMING
+embrace the fullness of now
+
+Return ONLY the two lines, nothing else.`,
+          },
+        ],
+      },
+    ],
+  });
+
+  const headlineText = headlineResponse.text?.trim() || "INNER WISDOM\nyour truth illuminated";
+  const headlineLines = headlineText.split('\n').map(l => l.trim());
+  const oracleHeadline = headlineLines[0]?.toUpperCase() || "INNER WISDOM";
+  const oracleTagline = headlineLines[1]?.toLowerCase() || "your truth illuminated";
+
   const posterResponse = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: [
@@ -157,24 +227,27 @@ Respond with ONLY ONE of these vibes (just the word, nothing else):
         role: "user",
         parts: [
           {
-            text: `Create an artistic image prompt for a beautiful poster based on this intention and conversation:
+            text: `Create an artistic image prompt for a mystical ORACLE CARD poster based on this intention:
 
+Key word to feature: "${oracleKeyword}" (must appear artistically integrated into the design, repeated in different sizes/opacities)
+Headline: "${oracleHeadline}"
+Tagline: "${oracleTagline}"
 Intention: "${intentionSummary}"
-Key insights: ${insights}
 Emotional vibe: ${vibe}
 
-Create a prompt for generating a beautiful, FULL-BLEED artistic poster that captures the emotional essence and themes. The style should be:
-- ASPECT RATIO: 9:16 PORTRAIT orientation (tall, vertical like a phone wallpaper or poster)
-- Modern and elegant, ready to print directly
+Create a prompt for an ORACLE CARD style poster with these requirements:
+- ASPECT RATIO: 9:16 PORTRAIT orientation (tall, vertical oracle card)
+- The word "${oracleKeyword}" should appear ARTISTICALLY INTEGRATED into the imagery - repeated in different sizes, layered, flowing through the design
+- At the BOTTOM: bold headline "${oracleHeadline}" with smaller tagline "${oracleTagline}" below it
 - ${colorPalette}
-- Abstract or metaphorical imagery matching the ${vibe} mood
-- Inspirational and visually striking
-- FULL BLEED: The artwork fills the entire image edge-to-edge with NO borders, NO frames, NO mockups, NO white backgrounds, NO picture frame effects
-- The art itself IS the poster - just the pure artwork, nothing around it
+- Mystical, cosmic, spiritual art style - like a beautiful oracle/tarot card
+- Abstract flowing imagery: energy bursts, cosmic swirls, flowing ribbons, crystal shards, sacred geometry
+- FULL BLEED: artwork fills edge-to-edge, no borders or frames
+- Typography is elegant, mystical, integrated into the art
 
-IMPORTANT: Begin your prompt with "9:16 portrait aspect ratio, " to ensure correct dimensions.
+IMPORTANT: Begin prompt with "9:16 portrait oracle card, typography integrated, "
 
-Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`,
+Return ONLY the image generation prompt. Keep under 120 words.`,
           },
         ],
       },
@@ -188,6 +261,9 @@ Return ONLY the image generation prompt, nothing else. Keep it under 100 words.`
     intentionSummary,
     insights,
     posterPrompt,
+    oracleKeyword,
+    oracleHeadline,
+    oracleTagline,
   };
 }
 

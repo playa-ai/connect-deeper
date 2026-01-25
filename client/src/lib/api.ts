@@ -55,6 +55,9 @@ export interface AnalysisResult {
   intentionSummary: string;
   insights: string;
   posterPrompt: string;
+  oracleKeyword: string;
+  oracleHeadline: string;
+  oracleTagline: string;
   connection: Connection;
 }
 

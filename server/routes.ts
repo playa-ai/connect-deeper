@@ -88,7 +88,7 @@ export async function registerRoutes(
         return res.status(400).json({ error: "No audio data to analyze" });
       }
 
-      const { transcript, intentionSummary, insights, posterPrompt } = await analyzeAudio(
+      const { transcript, intentionSummary, insights, posterPrompt, oracleKeyword, oracleHeadline, oracleTagline } = await analyzeAudio(
         connection.audioData,
         connection.intentionText,
         connection.questionsAsked || []
@@ -99,6 +99,9 @@ export async function registerRoutes(
         intentionSummary,
         aiInsights: insights,
         posterPrompt,
+        oracleKeyword,
+        oracleHeadline,
+        oracleTagline,
       });
 
       res.json({
@@ -106,6 +109,9 @@ export async function registerRoutes(
         intentionSummary,
         insights,
         posterPrompt,
+        oracleKeyword,
+        oracleHeadline,
+        oracleTagline,
         connection: updatedConnection,
       });
     } catch (error) {

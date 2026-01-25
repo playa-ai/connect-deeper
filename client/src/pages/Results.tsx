@@ -44,6 +44,9 @@ export default function Results() {
   const [transcript, setTranscript] = useState("");
   const [intentionSummary, setIntentionSummary] = useState("");
   const [insights, setInsights] = useState("");
+  const [oracleKeyword, setOracleKeyword] = useState("");
+  const [oracleHeadline, setOracleHeadline] = useState("");
+  const [oracleTagline, setOracleTagline] = useState("");
   
   const [posterImageUrl, setPosterImageUrl] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(false);
@@ -76,6 +79,9 @@ export default function Results() {
       setTranscript(analysis.transcript);
       setIntentionSummary(analysis.intentionSummary);
       setInsights(analysis.insights);
+      setOracleKeyword(analysis.oracleKeyword || "");
+      setOracleHeadline(analysis.oracleHeadline || "");
+      setOracleTagline(analysis.oracleTagline || "");
       
       setProcessingState('complete');
       
@@ -343,55 +349,95 @@ export default function Results() {
           </div>
         )}
 
-        {/* Follow-up: 1 question + 1 quest */}
+        {/* Oracle Card - Back (Guidance) */}
         {(loadingFollowUp || nextQuestion || nextQuest) && (
-          <div className="space-y-4">
-            {loadingFollowUp ? (
-              <div className="flex items-center justify-center py-6">
-                <Loader2 className="w-5 h-5 animate-spin text-primary mr-2" />
-                <span className="text-sm text-muted-foreground">Finding your next step...</span>
+          <div className="relative">
+            <div className="text-center mb-4">
+              <p className="text-xs text-muted-foreground uppercase tracking-widest">Turn the Card</p>
+            </div>
+            
+            <div className="bg-gradient-to-br from-purple-900/30 via-indigo-900/20 to-pink-900/20 rounded-2xl border border-white/10 p-6 space-y-5 backdrop-blur-sm">
+              <div className="absolute top-0 left-0 w-full h-full rounded-2xl overflow-hidden pointer-events-none">
+                <div className="absolute top-[-50%] left-[-50%] w-[200%] h-[200%] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/5 via-transparent to-transparent opacity-50" />
               </div>
-            ) : (
-              <>
-                {nextQuestion && (
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <MessageCircle className="w-4 h-4 text-pink-400" />
-                      <span className="text-xs font-semibold text-pink-400 uppercase tracking-wide">Ask yourself</span>
+              
+              {loadingFollowUp ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary mr-2" />
+                  <span className="text-sm text-muted-foreground italic">Receiving guidance...</span>
+                </div>
+              ) : (
+                <>
+                  {nextQuestion && (
+                    <div className="text-center space-y-3">
+                      <div className="flex items-center justify-center gap-2">
+                        <MessageCircle className="w-4 h-4 text-pink-400" />
+                        <span className="text-xs font-semibold text-pink-400 uppercase tracking-[0.2em]">Ask Yourself</span>
+                      </div>
+                      <p className="text-lg text-white/90 italic font-light leading-relaxed" data-testid="text-next-question">
+                        "{nextQuestion}"
+                      </p>
                     </div>
-                    <p className="text-white/90" data-testid="text-next-question">"{nextQuestion}"</p>
-                  </div>
-                )}
-                
-                {nextQuest && (
-                  <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Zap className="w-4 h-4 text-yellow-400" />
-                      <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wide">Your quest</span>
+                  )}
+                  
+                  {nextQuestion && nextQuest && (
+                    <div className="flex items-center justify-center gap-4">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <Sparkles className="w-3 h-3 text-white/30" />
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     </div>
-                    <p className="text-white/90" data-testid="text-next-quest">{nextQuest}</p>
-                  </div>
-                )}
-              </>
-            )}
+                  )}
+                  
+                  {nextQuest && (
+                    <div className="text-center space-y-3">
+                      <div className="flex items-center justify-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-400" />
+                        <span className="text-xs font-semibold text-amber-400 uppercase tracking-[0.2em]">Your Quest</span>
+                      </div>
+                      <p className="text-base text-white/90 font-medium leading-relaxed" data-testid="text-next-quest">
+                        {nextQuest}
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Poster (async loaded) */}
-        {(posterLoading || posterImageUrl) && (
-          <div className="space-y-3">
-            <p className="text-xs text-muted-foreground text-center">9:16 print-ready format</p>
+        {/* Oracle Card - Front (Poster) */}
+        {(posterLoading || posterImageUrl || oracleKeyword) && (
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground uppercase tracking-widest">Your Oracle Card</p>
+            </div>
+            
+            {/* Oracle keyword display when no poster yet */}
+            {!posterImageUrl && oracleKeyword && (
+              <div className="text-center space-y-2 py-4">
+                <p className="text-4xl font-bold text-primary tracking-wider" data-testid="text-oracle-keyword">
+                  {oracleKeyword}
+                </p>
+                {oracleHeadline && (
+                  <p className="text-lg font-semibold text-white/90 uppercase tracking-wide">{oracleHeadline}</p>
+                )}
+                {oracleTagline && (
+                  <p className="text-sm text-muted-foreground italic">{oracleTagline}</p>
+                )}
+              </div>
+            )}
+            
             {posterLoading ? (
-              <div className="w-full aspect-[9/16] rounded-2xl bg-white/5 border border-white/10 flex flex-col items-center justify-center">
+              <div className="w-full aspect-[9/16] rounded-2xl bg-gradient-to-br from-primary/10 to-purple-500/10 border border-white/10 flex flex-col items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-primary mb-3" />
-                <p className="text-sm text-muted-foreground">Creating your poster...</p>
+                <p className="text-sm text-muted-foreground">Creating your oracle card...</p>
               </div>
             ) : posterImageUrl && (
               <>
-                <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl">
+                <div className="relative w-full aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/10">
                   <img 
                     src={posterImageUrl} 
-                    alt="Your connection poster" 
+                    alt="Your oracle card" 
                     className="w-full h-full object-cover"
                     data-testid="img-poster"
                   />
@@ -402,7 +448,7 @@ export default function Results() {
                   className="w-full h-12 border-white/10 hover:bg-white/5"
                   data-testid="button-download"
                 >
-                  <Download className="mr-2 w-4 h-4" /> Save Poster
+                  <Download className="mr-2 w-4 h-4" /> Save Card
                 </Button>
               </>
             )}

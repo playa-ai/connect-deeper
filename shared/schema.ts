@@ -44,6 +44,11 @@ export const connections = pgTable("connections", {
   posterPrompt: text("poster_prompt"),
   posterImageUrl: text("poster_image_url"),
   
+  // Oracle card elements
+  oracleKeyword: text("oracle_keyword"),
+  oracleHeadline: text("oracle_headline"),
+  oracleTagline: text("oracle_tagline"),
+  
   // Follow-up
   reminderSent: boolean("reminder_sent").notNull().default(false),
   reminderSentAt: timestamp("reminder_sent_at"),
