@@ -33,7 +33,7 @@ export default function Home() {
             </h1>
 
             <p className="text-xl text-muted-foreground leading-relaxed">
-                Help someone explore their 2026 intentions through a meaningful recorded conversation.
+                Help someone explore their intentions through a meaningful recorded conversation.
             </p>
             
             <div className="text-left space-y-3 text-muted-foreground text-sm bg-white/5 p-4 rounded-2xl">

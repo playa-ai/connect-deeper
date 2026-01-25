@@ -82,21 +82,12 @@ export default function Hook() {
             className="w-full h-16 text-lg font-semibold bg-gradient-to-r from-amber-400 to-yellow-500 text-black hover:from-amber-500 hover:to-yellow-600 hover:scale-[1.02] transition-all rounded-full shadow-[0_0_30px_rgba(251,191,36,0.3)] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             data-testid="button-experiment"
           >
-            Want to try a 60-second experiment? <ArrowRight className="ml-2 w-5 h-5" />
+            Let's go deeper <ArrowRight className="ml-2 w-5 h-5" />
           </Button>
 
           <p className="text-xs text-muted-foreground">
             Private by default. Nothing shared without permission.
           </p>
-
-          <Button 
-            variant="ghost" 
-            onClick={() => setLocation("/")}
-            className="text-muted-foreground hover:text-white"
-            data-testid="button-not-now"
-          >
-            Not now
-          </Button>
         </div>
       </motion.div>
     </div>

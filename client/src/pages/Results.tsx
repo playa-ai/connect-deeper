@@ -21,7 +21,7 @@ const LOADING_MESSAGES = [
   "Consulting the cosmos...",
   "Summoning your future self...",
   "Manifesting insights...",
-  "Downloading 2026 vibes...",
+  "Downloading good vibes...",
   "Tuning into your frequency...",
   "Asking the universe nicely...",
   "Aligning intentions...",
@@ -198,8 +198,8 @@ export default function Results() {
       
     if (navigator.share) {
       navigator.share({
-        title: 'My 2026 Connection',
-        text: intentionSummary ? `My intention for 2026: ${intentionSummary}` : 'Check out my 2026 connection memory!',
+        title: 'My Connection Memory',
+        text: intentionSummary ? `My intention: ${intentionSummary}` : 'Check out my connection memory!',
         url: shareUrl,
       }).catch(console.error);
     } else {
@@ -293,12 +293,45 @@ export default function Results() {
 
         {/* Intention - Hero */}
         <div className="text-center space-y-4">
-          <p className="text-sm text-muted-foreground uppercase tracking-wider">Your 2026 intention</p>
+          <p className="text-sm text-muted-foreground uppercase tracking-wider">Your intention</p>
           {intentionSummary && (
             <h1 className="text-3xl font-bold text-white leading-snug" data-testid="text-intention-summary">
               "{intentionSummary}"
             </h1>
           )}
+        </div>
+
+        {/* Email capture - Top of fold */}
+        <div className="space-y-3 bg-white/5 p-5 rounded-2xl border border-white/10">
+          <div className="text-center space-y-1">
+            <h3 className="font-medium text-white">Keep this memory</h3>
+            <p className="text-sm text-muted-foreground">We'll send it to your inbox</p>
+          </div>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleEmailSubmit)} className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input 
+                        placeholder="your@email.com" 
+                        {...field} 
+                        className="bg-black/20 border-white/10 text-white"
+                        data-testid="input-email"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90" data-testid="button-submit-email">
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </form>
+          </Form>
         </div>
 
         {/* Insight - Short & warm */}
@@ -385,39 +418,6 @@ export default function Results() {
         >
           <Share2 className="mr-2 w-4 h-4" /> Share
         </Button>
-
-        {/* Email capture */}
-        <div className="space-y-3 bg-white/5 p-5 rounded-2xl border border-white/10">
-          <div className="text-center space-y-1">
-            <h3 className="font-medium text-white">Keep this memory</h3>
-            <p className="text-sm text-muted-foreground">We'll send it to your inbox</p>
-          </div>
-          
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleEmailSubmit)} className="flex gap-2">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input 
-                        placeholder="your@email.com" 
-                        {...field} 
-                        className="bg-black/20 border-white/10 text-white"
-                        data-testid="input-email"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" size="icon" className="bg-primary hover:bg-primary/90" data-testid="button-submit-email">
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </form>
-          </Form>
-        </div>
 
         {/* NPS + Feedback */}
         <div className="space-y-5 border-t border-white/10 pt-6">

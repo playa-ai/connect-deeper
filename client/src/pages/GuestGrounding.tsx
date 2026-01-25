@@ -70,7 +70,7 @@ export default function GuestGrounding() {
             <p className="text-xs text-pink-400 uppercase tracking-wider font-semibold">What you'll get</p>
           </div>
           <p className="text-white/80 text-sm">
-            Insights about your 2026 intention, a personalized memory poster, and ideas to keep growing.
+            Insights about your intention, a personalized memory poster, and ideas to keep growing.
           </p>
         </motion.div>
 

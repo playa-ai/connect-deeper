@@ -1,6 +1,6 @@
 export type VibeQuadrant = 'playful-warm' | 'deep-intimate' | 'playful-curious' | 'deep-philosophical';
 
-export const INTENTION_QUESTION = "What's your intention for 2026?";
+export const INTENTION_QUESTION = "What's your intention for this season of life?";
 
 // Questions for each quadrant
 export const QUADRANT_QUESTIONS: Record<VibeQuadrant, string[]> = {

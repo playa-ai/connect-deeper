@@ -51,7 +51,7 @@ export default function Explain() {
             </div>
             <div>
               <p className="text-white font-medium">Answer a few prompts</p>
-              <p className="text-sm text-muted-foreground">Share what's on your mind for 2026</p>
+              <p className="text-sm text-muted-foreground">Share what's on your mind right now</p>
             </div>
           </motion.div>
 
@@ -85,9 +85,19 @@ export default function Explain() {
             Got it — let's begin <ArrowRight className="ml-2 w-6 h-6" />
           </Button>
 
-          <p className="text-xs text-muted-foreground">
-            Private by default. Nothing shared without permission.
-          </p>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-muted-foreground">
+              Your privacy matters. Nothing is shared without your permission.
+            </p>
+            <a 
+              href="https://playa-ai.org/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline"
+            >
+              Read our privacy policy
+            </a>
+          </div>
         </motion.div>
       </motion.div>
     </div>

@@ -31,6 +31,12 @@ export default function VibePicker2D({
 
   const quadrant = getVibeQuadrant(position.x, position.y);
   const quadrantInfo = QUADRANT_LABELS[quadrant];
+  
+  // Check if near center for "Balance" state
+  const isBalanced = Math.abs(position.x) < 25 && Math.abs(position.y) < 25;
+  const displayLabel = isBalanced 
+    ? { name: 'Balance', description: 'A blend of all vibes' }
+    : quadrantInfo;
 
   const updatePosition = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return;
@@ -171,19 +177,23 @@ export default function VibePicker2D({
       </div>
 
       <motion.div 
-        key={quadrant}
+        key={isBalanced ? 'balance' : quadrant}
         initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center space-y-1"
       >
         <div 
-          className="inline-block px-5 py-2 rounded-full font-semibold text-sm bg-white/10 text-white border border-white/20"
+          className={`inline-block px-5 py-2 rounded-full font-semibold text-sm border ${
+            isBalanced 
+              ? 'bg-gradient-to-r from-primary/20 to-purple-500/20 text-white border-primary/30 text-base' 
+              : 'bg-white/10 text-white border-white/20'
+          }`}
           data-testid="text-quadrant-label"
         >
-          {quadrantInfo.name}
+          {displayLabel.name}
         </div>
         <p className="text-xs text-muted-foreground">
-          {quadrantInfo.description}
+          {displayLabel.description}
         </p>
       </motion.div>
     </div>

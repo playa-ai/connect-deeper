@@ -47,7 +47,7 @@ export default function Handoff() {
             <div>
               <p className="text-white font-medium">Say something like:</p>
               <p className="text-muted-foreground mt-2 italic">
-                "I'd love to have a short conversation with you about what you want for 2026. 
+                "I'd love to have a short conversation with you about what matters most right now. 
                 The phone will record your answers and create something meaningful from it."
               </p>
             </div>

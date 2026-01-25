@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import Hook from "@/pages/Hook";
 import Explain from "@/pages/Explain";
 import ConsentVibe from "@/pages/ConsentVibe";
+import EyeContact from "@/pages/EyeContact";
 import Recording from "@/pages/Recording";
 import Results from "@/pages/Results";
 import SharedResults from "@/pages/SharedResults";
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={Hook} />
       <Route path="/explain" component={Explain} />
       <Route path="/consent" component={ConsentVibe} />
+      <Route path="/presence" component={EyeContact} />
       <Route path="/recording" component={Recording} />
       <Route path="/results" component={Results} />
       <Route path="/results/:id" component={Results} />

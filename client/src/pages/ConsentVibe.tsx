@@ -38,7 +38,7 @@ export default function ConsentVibe() {
         guestConsented: true,
       });
       
-      setLocation("/recording");
+      setLocation("/presence");
     } catch (error) {
       console.error("Error creating connection:", error);
       toast({
@@ -49,10 +49,6 @@ export default function ConsentVibe() {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleDecline = () => {
-    setLocation("/");
   };
 
   return (
@@ -83,9 +79,9 @@ export default function ConsentVibe() {
         </motion.a>
 
         <div className="text-center space-y-3">
-          <h1 className="text-3xl font-bold text-white">Choose your vibe</h1>
+          <h1 className="text-3xl font-bold text-white">Set the tone</h1>
           <p className="text-base text-muted-foreground leading-relaxed">
-            Tap anywhere on the grid to set the conversation tone.
+            Tap anywhere on the grid to pick your vibe. Center = Balance.
           </p>
         </div>
 
@@ -115,19 +111,19 @@ export default function ConsentVibe() {
             )}
           </Button>
           
-          <p className="text-xs text-muted-foreground">
-            Private by default. Nothing shared without permission.
-          </p>
-
-          <Button 
-            variant="ghost" 
-            onClick={handleDecline}
-            disabled={isSaving}
-            className="w-full text-muted-foreground hover:text-white"
-            data-testid="button-decline"
-          >
-            Not this time
-          </Button>
+          <div className="text-center space-y-1">
+            <p className="text-xs text-muted-foreground">
+              Your privacy matters. Nothing is shared without your permission.
+            </p>
+            <a 
+              href="https://playa-ai.org/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-xs text-primary hover:underline"
+            >
+              Read our privacy policy
+            </a>
+          </div>
         </div>
       </motion.div>
     </div>

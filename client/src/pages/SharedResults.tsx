@@ -44,7 +44,7 @@ export default function SharedResults() {
       navigator.share({
         title: 'Connection Memory',
         text: intention 
-          ? `My intention for 2026: ${intention}`
+          ? `My intention: ${intention}`
           : 'Check out this connection memory!',
         url: shareUrl,
       }).catch(console.error);
@@ -108,7 +108,7 @@ export default function SharedResults() {
       >
         <div className="text-center space-y-2">
           <p className="text-sm text-muted-foreground uppercase tracking-wider">Connection Memory</p>
-          <h1 className="text-3xl font-bold text-white">2026 Intention</h1>
+          <h1 className="text-3xl font-bold text-white">Your Intention</h1>
         </div>
 
         {(connection.intentionSummary || connection.intentionText) && (

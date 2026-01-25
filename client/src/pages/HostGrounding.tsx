@@ -63,7 +63,7 @@ export default function HostGrounding() {
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground uppercase tracking-widest">Before you begin</p>
           <h1 className="text-3xl font-bold text-white">Get Present</h1>
-          <p className="text-muted-foreground">You're about to help someone explore their 2026 goals</p>
+          <p className="text-muted-foreground">You're about to help someone explore what matters to them</p>
         </div>
 
         <div className="flex justify-center gap-2 mb-8">

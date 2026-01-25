@@ -43,7 +43,7 @@ export async function analyzeAudio(
             },
           },
           {
-            text: `Transcribe this audio conversation. The first question asked was "What's your intention for 2026?" followed by: ${questionsAsked.slice(1).join(", ")}. Provide a clean transcription of what was said, capturing the speaker's answers to each question.`,
+            text: `Transcribe this audio conversation. The first question asked was "What's your intention for this season of life?" followed by: ${questionsAsked.slice(1).join(", ")}. Provide a clean transcription of what was said, capturing the speaker's answers to each question.`,
           },
         ],
       },
@@ -59,7 +59,7 @@ export async function analyzeAudio(
         role: "user",
         parts: [
           {
-            text: `From this conversation transcript, extract and summarize the person's 2026 intention in ONE clear sentence. The first question asked was "What's your intention for 2026?"
+            text: `From this conversation transcript, extract and summarize the person's intention in ONE clear sentence. The first question asked was "What's your intention for this season of life?"
 
 Transcript:
 ${transcript}
@@ -68,7 +68,7 @@ RULES:
 - Write exactly ONE sentence (max 20 words)
 - Start with "I want to..." or "My intention is to..."
 - Use plain text only - NO markdown, NO asterisks
-- Capture the essence of what they said they want for 2026
+- Capture the essence of what they said they want
 - If unclear, write: "To discover what matters most"`,
           },
         ],
@@ -85,7 +85,7 @@ RULES:
         role: "user",
         parts: [
           {
-            text: `Analyze this person's conversation about their 2026 goals and provide structured insights.
+            text: `Analyze this person's conversation about their intentions and provide structured insights.
 
 Their stated intention: "${intentionSummary}"
 
@@ -209,7 +209,7 @@ export async function generateFollowUp(
         role: "user",
         parts: [
           {
-            text: `Based on this conversation about someone's 2026 intention, generate follow-up suggestions to continue the connection RIGHT NOW while you're still together.
+            text: `Based on this conversation about someone's intention, generate follow-up suggestions to continue the connection RIGHT NOW while you're still together.
 
 Intention: "${intentionText}"
 
